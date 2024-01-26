@@ -1,0 +1,30 @@
+version: "3"
+services:
+  postgres:
+    image: postgres:14-alpine
+    hostname: postgres
+    container_name: psql-keeper
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: goph-keeper
+      POSTGRES_USER: keeper
+      POSTGRES_PASSWORD: 12345678
+  #    volumes:
+  #      - ./data:/var/lib/postgresql/data
+
+  api:
+    container_name: goph-keeper
+    build: ./
+    volumes:
+      - .:/app
+    command: |
+      sh -c "/wait
+      migrate -path ./schema -database 'postgres://keeper:12345678@postgres:5432/goph-keeper?sslmode=disable' up
+      ./build/server/server"
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres
+    environment:
+      WAIT_HOSTS: postgres:5432
