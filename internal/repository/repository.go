@@ -10,7 +10,7 @@ type Repository struct {
 	*auth
 }
 
-func NewRepository(log *zap.SugaredLogger, db *sqlx.DB) *Repository {
+func New(log *zap.SugaredLogger, db *sqlx.DB) *Repository {
 	tm := newTm(log, db)
 	return &Repository{auth: newAuth(tm)}
 }

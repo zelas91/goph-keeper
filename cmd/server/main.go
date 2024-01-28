@@ -18,7 +18,7 @@ func main() {
 		log.Fatalf("db init err : %v", err)
 	}
 
-	repo := repository.NewRepository(log, db)
+	repo := repository.New(log, db)
 
 	serv := service.New(
 		service.WithAuthUseRepository(repo),
