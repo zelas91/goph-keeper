@@ -12,19 +12,19 @@ import (
 
 type Controllers struct {
 	*auth
-	log *zap.SugaredLogger
+	log   *zap.SugaredLogger
+	valid *validator.Validate
 }
 
-type services interface {
-	userService
-}
-
-func NewControllers(log *zap.SugaredLogger, serv services) *Controllers {
-	valid := validator.New()
-	return &Controllers{
-		log:  log,
-		auth: newUserHandler(log, serv, valid),
+func New(log *zap.SugaredLogger, services ...func(c *Controllers)) *Controllers {
+	ctl := &Controllers{
+		log:   log,
+		valid: validator.New(),
 	}
+	for _, serv := range services {
+		serv(ctl)
+	}
+	return ctl
 }
 
 func (c *Controllers) InitRoutes() http.Handler {

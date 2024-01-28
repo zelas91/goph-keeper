@@ -23,8 +23,10 @@ type userService interface {
 	CreateToken(ctx context.Context, user models.User) (string, error)
 }
 
-func newUserHandler(log *zap.SugaredLogger, service userService, valid *validator.Validate) *auth {
-	return &auth{service: service, valid: valid, log: log}
+func WithAuthUseService(us userService) func(c *Controllers) {
+	return func(c *Controllers) {
+		c.auth = &auth{service: us, valid: c.valid, log: c.log}
+	}
 }
 
 func (a *auth) signUp() http.HandlerFunc {

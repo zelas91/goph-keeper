@@ -23,8 +23,10 @@ type Claims struct {
 	Login string
 }
 
-func newUserService(repo userRepo) *auth {
-	return &auth{repo: repo, cache: cache.New(time.Minute*10, time.Minute*10)}
+func WithAuthUseService(up userRepo) func(s *Service) {
+	return func(s *Service) {
+		s.auth = &auth{repo: up, cache: cache.New(time.Minute*10, time.Minute*10)}
+	}
 }
 
 //go:generate mockgen -package mocks -destination=./mocks/mock_user.go -source=user.go -package=mock

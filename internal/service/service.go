@@ -9,13 +9,14 @@ type Service struct {
 	*auth
 }
 
-type repository interface {
-	userRepo
-}
 type ParserService interface {
 	ParserToken(ctx context.Context, tokenString string) (*models.User, error)
 }
 
-func NewService(repo repository) *Service {
-	return &Service{auth: newUserService(repo)}
+func New(services ...func(c *Service)) *Service {
+	ctl := &Service{}
+	for _, serv := range services {
+		serv(ctl)
+	}
+	return ctl
 }

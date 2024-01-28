@@ -16,11 +16,17 @@ func main() {
 	db, err := repository.NewPostgresDB(*cfg.DBURL)
 	if err != nil {
 		log.Fatalf("db init err : %v", err)
-
 	}
+
 	repo := repository.NewRepository(log, db)
-	serv := service.NewService(repo)
-	handlers := controllers.NewControllers(log, serv)
+
+	serv := service.New(
+		service.WithAuthUseService(repo),
+	)
+
+	handlers := controllers.New(log,
+		controllers.WithAuthUseService(serv),
+	)
 
 	router := chi.NewRouter()
 	router.Mount("/", handlers.InitRoutes())
