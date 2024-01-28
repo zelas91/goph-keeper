@@ -19,7 +19,6 @@ type AuthMiddleware struct {
 func NewAuthParser(log *zap.SugaredLogger, service interface{}) *AuthMiddleware {
 	parser, ok := service.(tokenParser)
 	if !ok {
-		// Обработка случаев, когда service не является tokenParser
 		log.Error("Service is not a valid tokenParser")
 		return nil
 	}
