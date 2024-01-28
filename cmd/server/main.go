@@ -21,7 +21,7 @@ func main() {
 	repo := repository.NewRepository(log, db)
 
 	serv := service.New(
-		service.WithAuthUseService(repo),
+		service.WithAuthUseRepository(repo),
 	)
 
 	handlers := controllers.New(log,

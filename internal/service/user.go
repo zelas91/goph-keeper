@@ -23,7 +23,7 @@ type Claims struct {
 	Login string
 }
 
-func WithAuthUseService(up userRepo) func(s *Service) {
+func WithAuthUseRepository(up userRepo) func(s *Service) {
 	return func(s *Service) {
 		s.auth = &auth{repo: up, cache: cache.New(time.Minute*10, time.Minute*10)}
 	}
