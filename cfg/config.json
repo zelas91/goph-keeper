@@ -1,0 +1,16 @@
+{
+  "level" : "debug",
+  "encoding": "json",
+  "outputPaths":["stdout", "log.log"],
+  "errorOutputPaths":["stderr"],
+  "disableCaller": false,
+  "encoderConfig": {
+    "messageKey":"msg",
+    "levelKey":"level",
+    "levelEncoder":"lowercase",
+    "timeKey":"ts",
+    "timeEncoder":"ISO8601",
+    "callerKey": "call",
+    "callerEncoder":"short"
+  }
+}

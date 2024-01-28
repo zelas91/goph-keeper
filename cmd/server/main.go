@@ -1,26 +1,30 @@
 package main
 
 import (
-	"fmt"
-	"github.com/go-playground/validator/v10"
-	"github.com/zelas91/goph-keeper/internal/models"
+	"github.com/go-chi/chi/v5"
+	"github.com/zelas91/goph-keeper/internal/controllers"
+	"github.com/zelas91/goph-keeper/internal/logger"
+	"github.com/zelas91/goph-keeper/internal/repository"
+	"github.com/zelas91/goph-keeper/internal/service"
+	"net/http"
 )
 
 func main() {
-	//fmt.Println("start ")
-	//user := controller.NewUserHandler(service.NewUserService())
-	//
-	//router := chi.NewRouter()
-	//router.Mount("/", user.InitRoutes())
-	//
-	//http.ListenAndServe(":9095", router)
+	log := logger.New()
+	log.Info("start ")
+	cfg := NewConfig()
+	db, err := repository.NewPostgresDB(*cfg.DBURL)
+	if err != nil {
+		log.Fatalf("db init err : %v", err)
 
-	user := models.User{
-		Email:    "zelas@gmail.com",
-		Password: "asd",
-		Login:    "asd",
-		Card:     "4283183072528759",
 	}
-	v := validator.New()
-	fmt.Println(v.Struct(user))
+	repo := repository.NewRepository(log, db)
+	serv := service.NewService(repo)
+	handlers := controllers.NewControllers(log, serv)
+
+	router := chi.NewRouter()
+	router.Mount("/", handlers.InitRoutes())
+
+	http.ListenAndServe(":9095", router)
+
 }

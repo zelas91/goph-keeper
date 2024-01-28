@@ -2,7 +2,7 @@ version: "3"
 services:
   postgres:
     image: postgres:14-alpine
-    hostname: postgres
+    hostname: pql
     container_name: psql-keeper
     ports:
       - "5432:5432"
@@ -20,8 +20,8 @@ services:
       - .:/app
     command: |
       sh -c "/wait
-      migrate -path ./schema -database 'postgres://keeper:12345678@postgres:5432/goph-keeper?sslmode=disable' up
-      ./build/server/server"
+      migrate -path ./schema -database 'postgres://keeper:12345678@postgres:5432/goph-keeper?sslmode=disable' up"
+#      ./build/server/server"
     ports:
       - "8080:8080"
     depends_on:
