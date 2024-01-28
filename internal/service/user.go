@@ -59,7 +59,7 @@ func (a *auth) CreateToken(ctx context.Context, authUser models.User) (string, e
 	return token, err
 }
 
-func (a *auth) ParserToken(ctx context.Context, tokenString string) (*models.User, error) {
+func (a *auth) ParserToken(ctx context.Context, tokenString string) (int64, error) {
 	claims := &Claims{}
 	token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
@@ -68,27 +68,27 @@ func (a *auth) ParserToken(ctx context.Context, tokenString string) (*models.Use
 		return secret, nil
 	})
 	if err != nil && token == nil {
-		return nil, err
+		return 0, err
 	}
-	if !token.Valid && !time.Now().Before(claims.ExpiresAt.Time) {
-		return nil, errors.New("token not valid")
-	}
-	val, ok := a.cache.Get(tokenString)
 
+	if !token.Valid && !time.Now().Before(claims.ExpiresAt.Time) {
+		return 0, errors.New("token not valid")
+	}
+
+	val, ok := a.cache.Get(tokenString)
 	if ok {
 		user := val.(models.User)
-		return &user, nil
+		return user.ID, nil
 	}
+
 	user, err := a.repo.GetUser(ctx, models.User{Login: claims.Login})
 	if err != nil {
-		return nil, err
+		return 0, err
 	}
+
 	a.cache.Set(tokenString, user, cache.DefaultExpiration)
-	return &models.User{
-		Login:    user.Login,
-		Password: user.Password,
-		ID:       user.ID,
-	}, nil
+
+	return user.ID, nil
 }
 
 func generateJwt(login string) (string, error) {
