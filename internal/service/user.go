@@ -1,7 +1,6 @@
 package service
 
 import (
-	"context"
 	"errors"
 	"fmt"
 	"github.com/golang-jwt/jwt/v5"
@@ -9,6 +8,7 @@ import (
 	"github.com/zelas91/goph-keeper/internal/models"
 	"github.com/zelas91/goph-keeper/internal/repository/entities"
 	"golang.org/x/crypto/bcrypt"
+	"golang.org/x/net/context"
 	"time"
 )
 

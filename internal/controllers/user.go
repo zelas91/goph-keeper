@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"context"
 	"encoding/json"
 	"errors"
 	"github.com/go-chi/chi/v5"
@@ -10,6 +9,7 @@ import (
 	"github.com/zelas91/goph-keeper/internal/payload"
 	"github.com/zelas91/goph-keeper/internal/repository"
 	"go.uber.org/zap"
+	"golang.org/x/net/context"
 	"net/http"
 )
 

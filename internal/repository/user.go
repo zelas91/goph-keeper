@@ -1,11 +1,11 @@
 package repository
 
 import (
-	"context"
 	"errors"
 	"github.com/lib/pq"
 	"github.com/zelas91/goph-keeper/internal/models"
 	"github.com/zelas91/goph-keeper/internal/repository/entities"
+	"golang.org/x/net/context"
 )
 
 type auth struct {
