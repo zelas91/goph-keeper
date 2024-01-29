@@ -169,7 +169,7 @@ func TestSignUp(t *testing.T) {
 			request := httptest.NewRequest(test.method, test.url, strings.NewReader(string(body)))
 			w := httptest.NewRecorder()
 
-			h := handler.InitRoutes()
+			h := handler.CreateRoutes()
 			request.Header.Set("Content-Type", test.content)
 			h.ServeHTTP(w, request)
 			res := w.Result()
@@ -263,7 +263,7 @@ func TestSignIn(t *testing.T) {
 			request := httptest.NewRequest(test.method, test.url, strings.NewReader(string(body)))
 			w := httptest.NewRecorder()
 			request.Header.Set("Content-Type", test.content)
-			h := handler.InitRoutes()
+			h := handler.CreateRoutes()
 			h.ServeHTTP(w, request)
 			res := w.Result()
 			defer res.Body.Close()

@@ -32,11 +32,11 @@ func WithAuthUseService(us userService) func(c *Controllers) {
 	}
 }
 
-func (c *Controllers) InitRoutes() http.Handler {
+func (c *Controllers) CreateRoutes() http.Handler {
 	router := chi.NewRouter()
 	router.Use(middleware.ContentTypeJSON(c.log), middleware2.Recoverer)
 	router.Route("/api", func(r chi.Router) {
-		r.Mount("/", c.auth.initRoutes())
+		r.Mount("/", c.auth.createRoutes())
 	})
 	router.Route("/test", func(r chi.Router) {
 		r.Use(middleware.AuthorizationHandler(c.log, c.auth.service))

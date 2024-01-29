@@ -29,7 +29,7 @@ func main() {
 	)
 
 	router := chi.NewRouter()
-	router.Mount("/", handlers.InitRoutes())
+	router.Mount("/", handlers.CreateRoutes())
 
 	http.ListenAndServe(":9095", router)
 

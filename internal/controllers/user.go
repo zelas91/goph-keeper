@@ -102,7 +102,7 @@ func (a *auth) signIn() http.HandlerFunc {
 		w.WriteHeader(http.StatusOK)
 	}
 }
-func (a *auth) initRoutes() http.Handler {
+func (a *auth) createRoutes() http.Handler {
 	router := chi.NewRouter()
 	router.Route("/", func(r chi.Router) {
 		r.Post("/signup", a.signUp())
