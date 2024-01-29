@@ -15,21 +15,35 @@ type Controllers struct {
 	valid *validator.Validate
 }
 
-func New(log *zap.SugaredLogger, services ...func(c *Controllers)) *Controllers {
+func New(log *zap.SugaredLogger, options ...func(c *Controllers)) *Controllers {
 	ctl := &Controllers{
 		log:   log,
 		valid: validator.New(),
 	}
-	for _, serv := range services {
-		serv(ctl)
+	for _, opt := range options {
+		opt(ctl)
 	}
 	return ctl
 }
 
+func WithAuthUseService(us userService) func(c *Controllers) {
+	return func(c *Controllers) {
+		c.auth = &auth{service: us, valid: c.valid, log: c.log}
+	}
+}
+
 func (c *Controllers) InitRoutes() http.Handler {
 	router := chi.NewRouter()
-	middleware.NewAuthParser(c.log, c.valid)
 	router.Use(middleware.ContentTypeJSON(c.log), middleware2.Recoverer)
-	router.Mount("/api", c.auth.InitRoutes())
+	router.Route("/api", func(r chi.Router) {
+		r.Mount("/", c.auth.initRoutes())
+	})
+	router.Route("/test", func(r chi.Router) {
+		r.Use(middleware.AuthorizationHandler(c.log, c.auth.service))
+		r.Post("/", func(writer http.ResponseWriter, request *http.Request) {
+			writer.Write([]byte("asdasdasdasdasdas"))
+			writer.WriteHeader(http.StatusCreated)
+		})
+	})
 	return router
 }

@@ -18,15 +18,11 @@ type auth struct {
 	valid   *validator.Validate
 	log     *zap.SugaredLogger
 }
+
 type userService interface {
+	ParserToken(ctx context.Context, tokenString string) (int64, error)
 	CreateUser(ctx context.Context, user models.User) error
 	CreateToken(ctx context.Context, user models.User) (string, error)
-}
-
-func WithAuthUseService(us userService) func(c *Controllers) {
-	return func(c *Controllers) {
-		c.auth = &auth{service: us, valid: c.valid, log: c.log}
-	}
 }
 
 func (a *auth) signUp() http.HandlerFunc {
@@ -106,7 +102,7 @@ func (a *auth) signIn() http.HandlerFunc {
 		w.WriteHeader(http.StatusOK)
 	}
 }
-func (a *auth) InitRoutes() http.Handler {
+func (a *auth) initRoutes() http.Handler {
 	router := chi.NewRouter()
 	router.Route("/", func(r chi.Router) {
 		r.Post("/signup", a.signUp())

@@ -23,12 +23,6 @@ type Claims struct {
 	Login string
 }
 
-func WithAuthUseRepository(up userRepo) func(s *Service) {
-	return func(s *Service) {
-		s.auth = &auth{repo: up, cache: cache.New(time.Minute*10, time.Minute*10)}
-	}
-}
-
 //go:generate mockgen -package mocks -destination=./mocks/mock_user.go -source=user.go -package=mock
 type userRepo interface {
 	CreateUser(ctx context.Context, login, password string) error
