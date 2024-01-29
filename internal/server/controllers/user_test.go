@@ -3,10 +3,13 @@ package controllers
 import (
 	"database/sql"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 	"github.com/zelas91/goph-keeper/internal/logger"
+	mock2 "github.com/zelas91/goph-keeper/internal/server/controllers/mocks"
+	"github.com/zelas91/goph-keeper/internal/server/models"
 	"github.com/zelas91/goph-keeper/internal/server/repository"
 	"github.com/zelas91/goph-keeper/internal/server/repository/entities"
 	"github.com/zelas91/goph-keeper/internal/server/service"
@@ -275,6 +278,201 @@ func TestSignIn(t *testing.T) {
 			res := w.Result()
 			defer res.Body.Close()
 
+			assert.Equal(t, test.want, res.StatusCode)
+		})
+	}
+}
+
+type mockBehaviorCreateService func(s *mock2.MockuserService, user models.User)
+type mockBehaviorCreateTokenService func(s *mock2.MockuserService, user models.User)
+
+func TestSignInService(t *testing.T) {
+
+	tests := []struct {
+		name            string
+		want            int
+		url             string
+		content         string
+		method          string
+		mockCreateToken mockBehaviorCreateService
+		user            models.User
+	}{
+		{
+			name:    "#1 OK authorization",
+			want:    http.StatusOK,
+			url:     "/api/signin",
+			content: "application/json",
+			method:  http.MethodPost,
+			user: models.User{
+				Login:    "test",
+				Password: "123456789",
+			},
+			mockCreateToken: func(s *mock2.MockuserService, user models.User) {
+				s.EXPECT().CreateToken(gomock.Any(), user).Return("token", nil)
+			},
+		}, {
+			name:    "#2 bad request validation",
+			want:    http.StatusBadRequest,
+			url:     "/api/signin",
+			content: "application/json",
+			method:  http.MethodPost,
+			user: models.User{
+				Login: "user",
+			},
+		}, {
+			name:    "#3 Unauthorized",
+			want:    http.StatusUnauthorized,
+			url:     "/api/signin",
+			content: "application/json",
+			method:  http.MethodPost,
+			mockCreateToken: func(s *mock2.MockuserService, user models.User) {
+
+				s.EXPECT().CreateToken(gomock.Any(), user).Return("", errors.New("no user"))
+			},
+			user: models.User{
+				Login:    "user",
+				Password: "12345678",
+			},
+		},
+		{
+			name:   "#4 register media type unsupported ",
+			want:   http.StatusUnsupportedMediaType,
+			method: http.MethodPost,
+			url:    "/api/signin",
+		},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			ctrl := gomock.NewController(t)
+			defer ctrl.Finish()
+			serv := mock2.NewMockuserService(ctrl)
+			if test.mockCreateToken != nil {
+				test.mockCreateToken(serv, test.user)
+			}
+
+			handler := New(logger.New(), WithAuthUseService(serv))
+
+			body, err := json.Marshal(test.user)
+			assert.NoError(t, err, "Body write error")
+
+			request := httptest.NewRequest(test.method, test.url, strings.NewReader(string(body)))
+			w := httptest.NewRecorder()
+			request.Header.Set("Content-Type", test.content)
+			h := handler.CreateRoutes()
+			h.ServeHTTP(w, request)
+			res := w.Result()
+			defer res.Body.Close()
+			assert.Equal(t, test.want, res.StatusCode)
+		})
+	}
+}
+
+func TestSignUpService(t *testing.T) {
+	tests := []struct {
+		name            string
+		want            int
+		url             string
+		content         string
+		method          string
+		mockCreate      mockBehaviorCreateService
+		mockCreateToken mockBehaviorCreateTokenService
+		user            models.User
+	}{
+		{
+			name:    "#1 register OK",
+			want:    http.StatusOK,
+			method:  http.MethodPost,
+			url:     "/api/signup",
+			content: "application/json",
+			user: models.User{
+				Login:    "user",
+				Password: "12345678"},
+			mockCreate: func(s *mock2.MockuserService, user models.User) {
+				s.EXPECT().CreateUser(gomock.Any(), user).Return(nil)
+			},
+			mockCreateToken: func(s *mock2.MockuserService, user models.User) {
+				s.EXPECT().CreateToken(gomock.Any(), user).Return("token", nil)
+			},
+		},
+		{
+			name:    "#2 register bad request (validation)",
+			want:    http.StatusBadRequest,
+			method:  http.MethodPost,
+			url:     "/api/signup",
+			content: "application/json",
+			user:    models.User{Login: "test"},
+		},
+		{
+			name:    "#3 register conflict",
+			want:    http.StatusConflict,
+			method:  http.MethodPost,
+			url:     "/api/signup",
+			content: "application/json",
+			mockCreate: func(s *mock2.MockuserService, user models.User) {
+				s.EXPECT().CreateUser(gomock.Any(), user).Return(repository.ErrDuplicate)
+			},
+			user: models.User{
+				Login:    "user",
+				Password: "12345678",
+			},
+		},
+		{
+			name:    "#4 register Internal Server Error",
+			want:    http.StatusInternalServerError,
+			method:  http.MethodPost,
+			url:     "/api/signup",
+			content: "application/json",
+			mockCreate: func(s *mock2.MockuserService, user models.User) {
+				s.EXPECT().CreateUser(gomock.Any(), user).Return(sql.ErrNoRows)
+			},
+			user: models.User{
+				Login:    "user",
+				Password: "12345678",
+			},
+		},
+		{
+			name:    "#5 register Unauthorized",
+			want:    http.StatusUnauthorized,
+			method:  http.MethodPost,
+			url:     "/api/signup",
+			content: "application/json",
+			mockCreate: func(s *mock2.MockuserService, user models.User) {
+				s.EXPECT().CreateUser(gomock.Any(), user).Return(nil)
+			},
+			mockCreateToken: func(s *mock2.MockuserService, user models.User) {
+				s.EXPECT().CreateToken(gomock.Any(), user).Return("", errors.New("invalid token"))
+			},
+			user: models.User{
+				Login:    "user",
+				Password: "12345678",
+			},
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			ctrl := gomock.NewController(t)
+			defer ctrl.Finish()
+			serv := mock2.NewMockuserService(ctrl)
+			if test.mockCreate != nil {
+				test.mockCreate(serv, test.user)
+			}
+			if test.mockCreateToken != nil {
+				test.mockCreateToken(serv, test.user)
+			}
+
+			handler := New(logger.New(), WithAuthUseService(serv))
+
+			body, err := json.Marshal(test.user)
+			assert.NoError(t, err, "Body write error")
+
+			request := httptest.NewRequest(test.method, test.url, strings.NewReader(string(body)))
+			w := httptest.NewRecorder()
+			request.Header.Set("Content-Type", test.content)
+			h := handler.CreateRoutes()
+			h.ServeHTTP(w, request)
+			res := w.Result()
+			defer res.Body.Close()
 			assert.Equal(t, test.want, res.StatusCode)
 		})
 	}
