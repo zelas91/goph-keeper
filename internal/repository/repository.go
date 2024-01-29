@@ -3,14 +3,14 @@ package repository
 import (
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
-	"go.uber.org/zap"
+	"github.com/zelas91/goph-keeper/internal/logger"
 )
 
 type Repository struct {
 	*auth
 }
 
-func New(log *zap.SugaredLogger, db *sqlx.DB) *Repository {
+func New(log logger.Logger, db *sqlx.DB) *Repository {
 	tm := newTm(log, db)
 	return &Repository{auth: newAuth(tm)}
 }

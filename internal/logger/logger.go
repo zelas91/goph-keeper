@@ -18,7 +18,7 @@ func Shutdown() {
 		log.Printf("logger sync %v", err)
 	}
 }
-func New() *zap.SugaredLogger {
+func New() Logger {
 	once.Do(func() {
 		file, err := os.ReadFile("cfg/config.json")
 		if err != nil {
@@ -44,4 +44,18 @@ func New() *zap.SugaredLogger {
 		logger = l.Sugar()
 	})
 	return logger
+}
+
+type Logger interface {
+	Infof(template string, args ...interface{})
+	Info(args ...interface{})
+	Debugf(template string, args ...interface{})
+	Debug(args ...interface{})
+	Warnf(template string, args ...interface{})
+	Warn(args ...interface{})
+	Errorf(template string, args ...interface{})
+	Error(args ...interface{})
+	Fatalf(template string, args ...interface{})
+	Fatal(args ...interface{})
+	With(args ...interface{}) *zap.SugaredLogger
 }

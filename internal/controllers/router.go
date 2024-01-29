@@ -4,18 +4,18 @@ import (
 	"github.com/go-chi/chi/v5"
 	middleware2 "github.com/go-chi/chi/v5/middleware"
 	"github.com/go-playground/validator/v10"
+	"github.com/zelas91/goph-keeper/internal/logger"
 	"github.com/zelas91/goph-keeper/internal/middleware"
-	"go.uber.org/zap"
 	"net/http"
 )
 
 type Controllers struct {
 	*auth
-	log   *zap.SugaredLogger
+	log   logger.Logger
 	valid *validator.Validate
 }
 
-func New(log *zap.SugaredLogger, options ...func(c *Controllers)) *Controllers {
+func New(log logger.Logger, options ...func(c *Controllers)) *Controllers {
 	ctl := &Controllers{
 		log:   log,
 		valid: validator.New(),

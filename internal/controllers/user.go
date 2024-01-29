@@ -5,10 +5,10 @@ import (
 	"errors"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-playground/validator/v10"
+	"github.com/zelas91/goph-keeper/internal/logger"
 	"github.com/zelas91/goph-keeper/internal/models"
 	"github.com/zelas91/goph-keeper/internal/payload"
 	"github.com/zelas91/goph-keeper/internal/repository"
-	"go.uber.org/zap"
 	"golang.org/x/net/context"
 	"net/http"
 )
@@ -16,7 +16,7 @@ import (
 type auth struct {
 	service userService
 	valid   *validator.Validate
-	log     *zap.SugaredLogger
+	log     logger.Logger
 }
 
 type userService interface {

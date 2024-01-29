@@ -1,9 +1,9 @@
 package middleware
 
 import (
+	"github.com/zelas91/goph-keeper/internal/logger"
 	"github.com/zelas91/goph-keeper/internal/payload"
 	"github.com/zelas91/goph-keeper/internal/types"
-	"go.uber.org/zap"
 	"golang.org/x/net/context"
 	"net/http"
 )
@@ -12,7 +12,7 @@ type tokenParser interface {
 	ParserToken(ctx context.Context, tokenString string) (int64, error)
 }
 
-func AuthorizationHandler(log *zap.SugaredLogger, parser tokenParser) func(next http.Handler) http.Handler {
+func AuthorizationHandler(log logger.Logger, parser tokenParser) func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			cookie, err := r.Cookie("jwt")

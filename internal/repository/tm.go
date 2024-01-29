@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"errors"
 	"github.com/jmoiron/sqlx"
-	"go.uber.org/zap"
+	"github.com/zelas91/goph-keeper/internal/logger"
 	"golang.org/x/net/context"
 )
 
@@ -17,10 +17,10 @@ type transactionManager interface {
 
 type tm struct {
 	db  *sqlx.DB
-	log *zap.SugaredLogger
+	log logger.Logger
 }
 
-func newTm(log *zap.SugaredLogger, db *sqlx.DB) transactionManager {
+func newTm(log logger.Logger, db *sqlx.DB) transactionManager {
 	return &tm{
 		db:  db,
 		log: log,

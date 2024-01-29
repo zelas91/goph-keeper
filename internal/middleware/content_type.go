@@ -1,8 +1,8 @@
 package middleware
 
 import (
+	"github.com/zelas91/goph-keeper/internal/logger"
 	"github.com/zelas91/goph-keeper/internal/payload"
-	"go.uber.org/zap"
 	"net/http"
 )
 
@@ -11,7 +11,7 @@ const (
 	contentJSON = "application/json"
 )
 
-func ContentTypeJSON(log *zap.SugaredLogger) func(next http.Handler) http.Handler {
+func ContentTypeJSON(log logger.Logger) func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
