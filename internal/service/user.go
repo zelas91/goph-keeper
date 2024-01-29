@@ -25,8 +25,8 @@ type Claims struct {
 
 //go:generate mockgen -package mocks -destination=./mocks/mock_user.go -source=user.go -package=mock
 type userRepo interface {
-	CreateUser(ctx context.Context, login, password string) error
-	GetUser(ctx context.Context, user models.User) (entities.User, error)
+	CreateUser(ctx context.Context, user entities.User) error
+	GetUser(ctx context.Context, authUser models.User) (entities.User, error)
 }
 
 func (a *auth) CreateUser(ctx context.Context, user models.User) error {
@@ -35,7 +35,7 @@ func (a *auth) CreateUser(ctx context.Context, user models.User) error {
 		return errors.New("generate password hash err")
 	}
 
-	return a.repo.CreateUser(ctx, user.Login, string(hashedPassword))
+	return a.repo.CreateUser(ctx, entities.User{Login: user.Login, Password: string(hashedPassword)})
 }
 func (a *auth) CreateToken(ctx context.Context, authUser models.User) (string, error) {
 	user, err := a.repo.GetUser(ctx, authUser)
@@ -71,7 +71,7 @@ func (a *auth) ParserToken(ctx context.Context, tokenString string) (int64, erro
 
 	val, ok := a.cache.Get(tokenString)
 	if ok {
-		user := val.(models.User)
+		user := val.(entities.User)
 		return user.ID, nil
 	}
 

@@ -41,8 +41,8 @@ func (c *Controllers) CreateRoutes() http.Handler {
 	router.Route("/test", func(r chi.Router) {
 		r.Use(middleware.AuthorizationHandler(c.log, c.auth.service))
 		r.Post("/", func(writer http.ResponseWriter, request *http.Request) {
-			writer.Write([]byte("asdasdasdasdasdas"))
 			writer.WriteHeader(http.StatusCreated)
+			writer.Write([]byte("asdasdasdasdasdas"))
 		})
 	})
 	return router

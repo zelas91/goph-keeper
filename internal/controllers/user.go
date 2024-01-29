@@ -67,8 +67,6 @@ func (a *auth) signUp() http.HandlerFunc {
 			Value: token,
 		}
 		http.SetCookie(w, &cookies)
-
-		w.WriteHeader(http.StatusOK)
 	}
 }
 
@@ -99,7 +97,6 @@ func (a *auth) signIn() http.HandlerFunc {
 			Value: token,
 		}
 		http.SetCookie(w, &cookies)
-		w.WriteHeader(http.StatusOK)
 	}
 }
 func (a *auth) createRoutes() http.Handler {

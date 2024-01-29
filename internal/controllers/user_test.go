@@ -19,22 +19,27 @@ import (
 	"testing"
 )
 
-type mockBehaviorCreate func(s *mock.MockuserRepo, login, password string)
+type mockBehaviorCreate func(s *mock.MockuserRepo, user entities.User)
 type mockBehaviorGet func(s *mock.MockuserRepo, user models.User)
 
-type eqCreateUserParamsMatcher struct {
+type eqUserMatcher struct {
+	login    string
 	password string
 }
 
-func (e eqCreateUserParamsMatcher) Matches(x interface{}) bool {
-
-	err := bcrypt.CompareHashAndPassword([]byte(x.(string)), []byte(e.password))
+func (eq eqUserMatcher) Matches(x interface{}) bool {
+	user, ok := x.(entities.User)
+	if !ok {
+		return false
+	}
+	err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(eq.password))
 	return err == nil
 }
 
-func (e eqCreateUserParamsMatcher) String() string {
-	return fmt.Sprintf("password %v", e.password)
+func (eq eqUserMatcher) String() string {
+	return fmt.Sprintf("login: %s, password: %s", eq.login, eq.password)
 }
+
 func TestSignUp(t *testing.T) {
 	tests := []struct {
 		name                   string
@@ -54,8 +59,9 @@ func TestSignUp(t *testing.T) {
 			method:  http.MethodPost,
 			url:     "/api/signup",
 			content: "application/json",
-			mockBehaviorCreateUser: func(s *mock.MockuserRepo, login, password string) {
-				s.EXPECT().CreateUser(gomock.Any(), login, eqCreateUserParamsMatcher{password: password}).Return(nil)
+			mockBehaviorCreateUser: func(s *mock.MockuserRepo, user entities.User) {
+				eq := eqUserMatcher{login: user.Login, password: user.Password}
+				s.EXPECT().CreateUser(gomock.Any(), eq).Return(nil)
 			},
 			mockBehaviorGetUser: func(s *mock.MockuserRepo, user models.User) {
 				hash, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
@@ -92,9 +98,10 @@ func TestSignUp(t *testing.T) {
 			method:  http.MethodPost,
 			url:     "/api/signup",
 			content: "application/json",
-			mockBehaviorCreateUser: func(s *mock.MockuserRepo, login, password string) {
+			mockBehaviorCreateUser: func(s *mock.MockuserRepo, user entities.User) {
+
 				s.EXPECT().CreateUser(gomock.Any(),
-					gomock.Any(), gomock.Any()).Return(repository.ErrDuplicate)
+					gomock.Any()).Return(repository.ErrDuplicate)
 			},
 			login:    "user",
 			password: "12345678",
@@ -109,9 +116,9 @@ func TestSignUp(t *testing.T) {
 			method:  http.MethodPost,
 			url:     "/api/signup",
 			content: "application/json",
-			mockBehaviorCreateUser: func(s *mock.MockuserRepo, login, password string) {
+			mockBehaviorCreateUser: func(s *mock.MockuserRepo, user entities.User) {
 				s.EXPECT().CreateUser(gomock.Any(),
-					gomock.Any(), gomock.Any()).Return(sql.ErrNoRows)
+					gomock.Any()).Return(sql.ErrNoRows)
 			},
 			login:    "user",
 			password: "12345678",
@@ -127,8 +134,9 @@ func TestSignUp(t *testing.T) {
 			method:  http.MethodPost,
 			url:     "/api/signup",
 			content: "application/json",
-			mockBehaviorCreateUser: func(s *mock.MockuserRepo, login, password string) {
-				s.EXPECT().CreateUser(gomock.Any(), login, eqCreateUserParamsMatcher{password: password}).Return(nil)
+			mockBehaviorCreateUser: func(s *mock.MockuserRepo, user entities.User) {
+				eq := eqUserMatcher{login: user.Login, password: user.Password}
+				s.EXPECT().CreateUser(gomock.Any(), eq).Return(nil)
 			},
 			mockBehaviorGetUser: func(s *mock.MockuserRepo, user models.User) {
 
@@ -155,7 +163,7 @@ func TestSignUp(t *testing.T) {
 			defer ctrl.Finish()
 			repo := mock.NewMockuserRepo(ctrl)
 			if test.mockBehaviorCreateUser != nil {
-				test.mockBehaviorCreateUser(repo, test.login, test.password)
+				test.mockBehaviorCreateUser(repo, entities.User{Login: test.login, Password: test.password})
 			}
 			if test.mockBehaviorGetUser != nil {
 				test.mockBehaviorGetUser(repo, test.user)
