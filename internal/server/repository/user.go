@@ -3,8 +3,7 @@ package repository
 import (
 	"errors"
 	"github.com/lib/pq"
-	"github.com/zelas91/goph-keeper/internal/models"
-	"github.com/zelas91/goph-keeper/internal/repository/entities"
+	"github.com/zelas91/goph-keeper/internal/server/repository/entities"
 	"golang.org/x/net/context"
 )
 
@@ -27,10 +26,9 @@ func (a *auth) CreateUser(ctx context.Context, user entities.User) error {
 	}
 	return nil
 }
-func (a *auth) GetUser(ctx context.Context, authUser models.User) (entities.User, error) {
-	var user entities.User
+func (a *auth) GetUser(ctx context.Context, user entities.User) (entities.User, error) {
 	if err := a.tm.getConn(ctx).GetContext(ctx, &user,
-		"SELECT * FROM users WHERE login=$1", authUser.Login); err != nil {
+		"SELECT * FROM users WHERE login=$1", user.Login); err != nil {
 		return user, err
 	}
 	return user, nil

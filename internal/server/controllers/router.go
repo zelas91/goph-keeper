@@ -5,7 +5,7 @@ import (
 	middleware2 "github.com/go-chi/chi/v5/middleware"
 	"github.com/go-playground/validator/v10"
 	"github.com/zelas91/goph-keeper/internal/logger"
-	"github.com/zelas91/goph-keeper/internal/middleware"
+	"github.com/zelas91/goph-keeper/internal/server/middleware"
 	"net/http"
 )
 

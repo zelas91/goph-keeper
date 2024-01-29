@@ -6,9 +6,9 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-playground/validator/v10"
 	"github.com/zelas91/goph-keeper/internal/logger"
-	"github.com/zelas91/goph-keeper/internal/models"
-	"github.com/zelas91/goph-keeper/internal/payload"
-	"github.com/zelas91/goph-keeper/internal/repository"
+	"github.com/zelas91/goph-keeper/internal/server/models"
+	"github.com/zelas91/goph-keeper/internal/server/payload"
+	"github.com/zelas91/goph-keeper/internal/server/repository"
 	"golang.org/x/net/context"
 	"net/http"
 )
@@ -19,6 +19,7 @@ type auth struct {
 	log     logger.Logger
 }
 
+//go:generate mockgen -package mocks -destination=./mocks/mock_user_service.go -source=user.go -package=mock
 type userService interface {
 	ParserToken(ctx context.Context, tokenString string) (int64, error)
 	CreateUser(ctx context.Context, user models.User) error

@@ -7,11 +7,10 @@ import (
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 	"github.com/zelas91/goph-keeper/internal/logger"
-	"github.com/zelas91/goph-keeper/internal/models"
-	"github.com/zelas91/goph-keeper/internal/repository"
-	"github.com/zelas91/goph-keeper/internal/repository/entities"
-	"github.com/zelas91/goph-keeper/internal/service"
-	mock "github.com/zelas91/goph-keeper/internal/service/mocks"
+	"github.com/zelas91/goph-keeper/internal/server/repository"
+	"github.com/zelas91/goph-keeper/internal/server/repository/entities"
+	"github.com/zelas91/goph-keeper/internal/server/service"
+	"github.com/zelas91/goph-keeper/internal/server/service/mocks"
 	"golang.org/x/crypto/bcrypt"
 	"net/http"
 	"net/http/httptest"
@@ -20,7 +19,7 @@ import (
 )
 
 type mockBehaviorCreate func(s *mock.MockuserRepo, user entities.User)
-type mockBehaviorGet func(s *mock.MockuserRepo, user models.User)
+type mockBehaviorGet func(s *mock.MockuserRepo, user entities.User)
 
 type eqUserMatcher struct {
 	login    string
@@ -51,7 +50,7 @@ func TestSignUp(t *testing.T) {
 		mockBehaviorGetUser    mockBehaviorGet
 		login                  string
 		password               string
-		user                   models.User
+		user                   entities.User
 	}{
 		{
 			name:    "#1 register OK",
@@ -63,7 +62,7 @@ func TestSignUp(t *testing.T) {
 				eq := eqUserMatcher{login: user.Login, password: user.Password}
 				s.EXPECT().CreateUser(gomock.Any(), eq).Return(nil)
 			},
-			mockBehaviorGetUser: func(s *mock.MockuserRepo, user models.User) {
+			mockBehaviorGetUser: func(s *mock.MockuserRepo, user entities.User) {
 				hash, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
 				if err != nil {
 					return
@@ -77,7 +76,7 @@ func TestSignUp(t *testing.T) {
 			},
 			login:    "user",
 			password: "12345678",
-			user: models.User{
+			user: entities.User{
 				Login:    "user",
 				Password: "12345678"},
 		},
@@ -90,7 +89,7 @@ func TestSignUp(t *testing.T) {
 			content:  "application/json",
 			login:    "user",
 			password: "12345678",
-			user:     models.User{},
+			user:     entities.User{},
 		},
 		{
 			name:    "#3 register conflict",
@@ -105,7 +104,7 @@ func TestSignUp(t *testing.T) {
 			},
 			login:    "user",
 			password: "12345678",
-			user: models.User{
+			user: entities.User{
 				Login:    "user",
 				Password: "12345678",
 			},
@@ -122,7 +121,7 @@ func TestSignUp(t *testing.T) {
 			},
 			login:    "user",
 			password: "12345678",
-			user: models.User{
+			user: entities.User{
 				Login:    "user",
 				Password: "12345678",
 			},
@@ -138,13 +137,13 @@ func TestSignUp(t *testing.T) {
 				eq := eqUserMatcher{login: user.Login, password: user.Password}
 				s.EXPECT().CreateUser(gomock.Any(), eq).Return(nil)
 			},
-			mockBehaviorGetUser: func(s *mock.MockuserRepo, user models.User) {
+			mockBehaviorGetUser: func(s *mock.MockuserRepo, user entities.User) {
 
 				s.EXPECT().GetUser(gomock.Any(), user).Return(entities.User{}, sql.ErrNoRows)
 			},
 			login:    "user",
 			password: "12345678",
-			user: models.User{
+			user: entities.User{
 				Login:    "user",
 				Password: "12345678",
 			},
@@ -197,7 +196,7 @@ func TestSignIn(t *testing.T) {
 		content             string
 		method              string
 		mockBehaviorGetUser mockBehaviorGet
-		user                models.User
+		user                entities.User
 	}{
 		{
 			name:    "#1 OK authorization",
@@ -205,7 +204,7 @@ func TestSignIn(t *testing.T) {
 			url:     "/api/signin",
 			content: "application/json",
 			method:  http.MethodPost,
-			mockBehaviorGetUser: func(s *mock.MockuserRepo, user models.User) {
+			mockBehaviorGetUser: func(s *mock.MockuserRepo, user entities.User) {
 				hash, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
 				if err != nil {
 					return
@@ -217,7 +216,7 @@ func TestSignIn(t *testing.T) {
 				}
 				s.EXPECT().GetUser(gomock.Any(), user).Return(us, nil)
 			},
-			user: models.User{
+			user: entities.User{
 				Login:    "user",
 				Password: "12345678",
 			},
@@ -228,7 +227,7 @@ func TestSignIn(t *testing.T) {
 			url:     "/api/signin",
 			content: "application/json",
 			method:  http.MethodPost,
-			user: models.User{
+			user: entities.User{
 				Login: "user",
 			},
 		},
@@ -238,11 +237,11 @@ func TestSignIn(t *testing.T) {
 			url:     "/api/signin",
 			content: "application/json",
 			method:  http.MethodPost,
-			mockBehaviorGetUser: func(s *mock.MockuserRepo, user models.User) {
+			mockBehaviorGetUser: func(s *mock.MockuserRepo, user entities.User) {
 
 				s.EXPECT().GetUser(gomock.Any(), user).Return(entities.User{}, sql.ErrNoRows)
 			},
-			user: models.User{
+			user: entities.User{
 				Login:    "user",
 				Password: "12345678",
 			},

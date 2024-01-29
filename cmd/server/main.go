@@ -2,10 +2,10 @@ package main
 
 import (
 	"github.com/go-chi/chi/v5"
-	"github.com/zelas91/goph-keeper/internal/controllers"
 	"github.com/zelas91/goph-keeper/internal/logger"
-	"github.com/zelas91/goph-keeper/internal/repository"
-	"github.com/zelas91/goph-keeper/internal/service"
+	"github.com/zelas91/goph-keeper/internal/server/controllers"
+	"github.com/zelas91/goph-keeper/internal/server/repository"
+	"github.com/zelas91/goph-keeper/internal/server/service"
 	"net/http"
 )
 

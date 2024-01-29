@@ -2,8 +2,8 @@ package middleware
 
 import (
 	"github.com/zelas91/goph-keeper/internal/logger"
-	"github.com/zelas91/goph-keeper/internal/payload"
-	"github.com/zelas91/goph-keeper/internal/types"
+	"github.com/zelas91/goph-keeper/internal/server/payload"
+	"github.com/zelas91/goph-keeper/internal/server/types"
 	"golang.org/x/net/context"
 	"net/http"
 )

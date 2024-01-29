@@ -5,8 +5,9 @@ import (
 	"fmt"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/patrickmn/go-cache"
-	"github.com/zelas91/goph-keeper/internal/models"
-	"github.com/zelas91/goph-keeper/internal/repository/entities"
+	"github.com/zelas91/goph-keeper/internal/server/models"
+	"github.com/zelas91/goph-keeper/internal/server/repository/entities"
+	"github.com/zelas91/goph-keeper/internal/utils"
 	"golang.org/x/crypto/bcrypt"
 	"golang.org/x/net/context"
 	"time"
@@ -23,10 +24,10 @@ type Claims struct {
 	Login string
 }
 
-//go:generate mockgen -package mocks -destination=./mocks/mock_user.go -source=user.go -package=mock
+//go:generate mockgen -package mocks -destination=./mocks/mock_user_repo.go -source=user.go -package=mock
 type userRepo interface {
 	CreateUser(ctx context.Context, user entities.User) error
-	GetUser(ctx context.Context, authUser models.User) (entities.User, error)
+	GetUser(ctx context.Context, user entities.User) (entities.User, error)
 }
 
 func (a *auth) CreateUser(ctx context.Context, user models.User) error {
@@ -38,7 +39,7 @@ func (a *auth) CreateUser(ctx context.Context, user models.User) error {
 	return a.repo.CreateUser(ctx, entities.User{Login: user.Login, Password: string(hashedPassword)})
 }
 func (a *auth) CreateToken(ctx context.Context, authUser models.User) (string, error) {
-	user, err := a.repo.GetUser(ctx, authUser)
+	user, err := a.repo.GetUser(ctx, utils.ModelUserInEntitiesUser(authUser))
 	if err != nil {
 		return "", err
 	}
@@ -75,7 +76,7 @@ func (a *auth) ParserToken(ctx context.Context, tokenString string) (int64, erro
 		return user.ID, nil
 	}
 
-	user, err := a.repo.GetUser(ctx, models.User{Login: claims.Login})
+	user, err := a.repo.GetUser(ctx, entities.User{Login: claims.Login})
 	if err != nil {
 		return 0, err
 	}
