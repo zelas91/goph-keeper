@@ -171,7 +171,7 @@ func TestSignUp(t *testing.T) {
 				test.mockBehaviorGetUser(repo, test.user)
 			}
 
-			handler := New(logger.New(), WithAuthUseService(service.New(service.WithAuthUseRepository(repo))))
+			handler := New(logger.New(""), WithAuthUseService(service.New(service.WithAuthUseRepository(repo))))
 
 			body, err := json.Marshal(test.user)
 			assert.NoError(t, err, "Body write error")
@@ -265,7 +265,7 @@ func TestSignIn(t *testing.T) {
 			if test.mockBehaviorGetUser != nil {
 				test.mockBehaviorGetUser(repo, test.user)
 			}
-			handler := New(logger.New(), WithAuthUseService(service.New(service.WithAuthUseRepository(repo))))
+			handler := New(logger.New(""), WithAuthUseService(service.New(service.WithAuthUseRepository(repo))))
 
 			body, err := json.Marshal(test.user)
 			assert.NoError(t, err, "Body write error")
@@ -350,7 +350,7 @@ func TestSignInService(t *testing.T) {
 				test.mockCreateToken(serv, test.user)
 			}
 
-			handler := New(logger.New(), WithAuthUseService(serv))
+			handler := New(logger.New(""), WithAuthUseService(serv))
 
 			body, err := json.Marshal(test.user)
 			assert.NoError(t, err, "Body write error")
@@ -461,7 +461,7 @@ func TestSignUpService(t *testing.T) {
 				test.mockCreateToken(serv, test.user)
 			}
 
-			handler := New(logger.New(), WithAuthUseService(serv))
+			handler := New(logger.New(""), WithAuthUseService(serv))
 
 			body, err := json.Marshal(test.user)
 			assert.NoError(t, err, "Body write error")

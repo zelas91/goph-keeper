@@ -7,18 +7,22 @@ import (
 )
 
 var (
-	addr  *string
-	dbURL *string
+	addr      *string
+	dbURL     *string
+	cfgLogger *string
 )
 
 func init() {
-	addr = flag.String("a", "localhost:8081", "endpoint start server")
+	addr = flag.String("a", "localhost:8080", "endpoint start server")
 	dbURL = flag.String("d", "host=localhost port=5432 user=keeper dbname=goph-keeper password=12345678 sslmode=disable", "url DB")
+	cfgLogger = flag.String("l", "cfg/config.json", "config file logger")
+
 }
 
 type Config struct {
-	Addr  *string `env:"RUN_ADDRESS"`
-	DBURL *string `env:"DATABASE_URI"`
+	Addr      *string `env:"RUN_ADDRESS"`
+	DBurl     *string `env:"DATABASE_URI"`
+	CfgLogger *string `env:"CONFIG_LOGGER"`
 }
 
 func NewConfig() *Config {
@@ -31,8 +35,11 @@ func NewConfig() *Config {
 	if cfg.Addr == nil {
 		cfg.Addr = addr
 	}
-	if cfg.DBURL == nil {
-		cfg.DBURL = dbURL
+	if cfg.DBurl == nil {
+		cfg.DBurl = dbURL
+	}
+	if cfg.CfgLogger == nil {
+		cfg.CfgLogger = cfgLogger
 	}
 
 	flag.Parse()

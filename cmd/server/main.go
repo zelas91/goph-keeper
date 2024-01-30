@@ -10,10 +10,11 @@ import (
 )
 
 func main() {
-	log := logger.New()
-	log.Info("start ")
 	cfg := NewConfig()
-	db, err := repository.NewPostgresDB(*cfg.DBURL)
+	log := logger.New(*cfg.CfgLogger)
+	log.Info("start ")
+
+	db, err := repository.NewPostgresDB(*cfg.DBurl)
 	if err != nil {
 		log.Fatalf("db init err : %v", err)
 	}
@@ -31,6 +32,6 @@ func main() {
 	router := chi.NewRouter()
 	router.Mount("/", handlers.CreateRoutes())
 
-	http.ListenAndServe(":9095", router)
+	http.ListenAndServe(*cfg.Addr, router)
 
 }

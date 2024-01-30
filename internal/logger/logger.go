@@ -18,9 +18,9 @@ func Shutdown() {
 		log.Printf("logger sync %v", err)
 	}
 }
-func New() Logger {
+func New(pathCfg string) Logger {
 	once.Do(func() {
-		file, err := os.ReadFile("cfg/config.json")
+		file, err := os.ReadFile(pathCfg)
 		if err != nil {
 			log.Println(err)
 			l, err := zap.NewDevelopment()
