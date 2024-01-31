@@ -13,7 +13,7 @@ var (
 )
 
 func main() {
-	fmt.Printf("client build data (%s) version (%s)\n", buildDate, buildCommit)
+	fmt.Printf("client build data (%s) version (%s) ---(%s)---\n", buildDate, buildCommit, secretKey)
 	crypt, err := crypto.NewEncrypt(secretKey)
 	fmt.Println(crypt, err)
 	client.NewClient("localhost:8080").Start()

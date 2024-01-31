@@ -12,7 +12,7 @@ import (
 func main() {
 	cfg := NewConfig()
 	log := logger.New(*cfg.CfgLogger)
-	log.Info("start ")
+	log.Info("start ", cfg.SecretKey)
 
 	db, err := repository.NewPostgresDB(*cfg.DBurl)
 	if err != nil {
