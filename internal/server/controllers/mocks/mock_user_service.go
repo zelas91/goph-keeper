@@ -65,10 +65,10 @@ func (mr *MockuserServiceMockRecorder) CreateUser(ctx, user interface{}) *gomock
 }
 
 // ParserToken mocks base method.
-func (m *MockuserService) ParserToken(ctx context.Context, tokenString string) (int64, error) {
+func (m *MockuserService) ParserToken(ctx context.Context, tokenString string) (int, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ParserToken", ctx, tokenString)
-	ret0, _ := ret[0].(int64)
+	ret0, _ := ret[0].(int)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }

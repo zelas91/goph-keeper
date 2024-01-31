@@ -9,7 +9,7 @@ import (
 )
 
 type tokenParser interface {
-	ParserToken(ctx context.Context, tokenString string) (int64, error)
+	ParserToken(ctx context.Context, tokenString string) (int, error)
 }
 
 func AuthorizationHandler(log logger.Logger, parser tokenParser) func(next http.Handler) http.Handler {

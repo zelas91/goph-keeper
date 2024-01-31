@@ -127,7 +127,7 @@ func TestCreateToken(t *testing.T) {
 					return
 				}
 				us := entities.User{
-					ID:       1,
+					Id:       1,
 					Login:    user.Login,
 					Password: string(hash),
 				}

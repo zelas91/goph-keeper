@@ -54,7 +54,7 @@ func (a *auth) CreateToken(ctx context.Context, authUser models.User) (string, e
 	return token, err
 }
 
-func (a *auth) ParserToken(ctx context.Context, tokenString string) (int64, error) {
+func (a *auth) ParserToken(ctx context.Context, tokenString string) (int, error) {
 	claims := &Claims{}
 	token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
@@ -73,7 +73,7 @@ func (a *auth) ParserToken(ctx context.Context, tokenString string) (int64, erro
 	val, ok := a.cache.Get(tokenString)
 	if ok {
 		user := val.(entities.User)
-		return user.ID, nil
+		return user.Id, nil
 	}
 
 	user, err := a.repo.GetUser(ctx, entities.User{Login: claims.Login})
@@ -83,7 +83,7 @@ func (a *auth) ParserToken(ctx context.Context, tokenString string) (int64, erro
 
 	a.cache.Set(tokenString, user, cache.DefaultExpiration)
 
-	return user.ID, nil
+	return user.Id, nil
 }
 
 func generateJwt(login string) (string, error) {

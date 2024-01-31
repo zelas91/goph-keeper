@@ -21,7 +21,7 @@ type auth struct {
 
 //go:generate mockgen -package mocks -destination=./mocks/mock_user_service.go -source=user.go -package=mock
 type userService interface {
-	ParserToken(ctx context.Context, tokenString string) (int64, error)
+	ParserToken(ctx context.Context, tokenString string) (int, error)
 	CreateUser(ctx context.Context, user models.User) error
 	CreateToken(ctx context.Context, user models.User) (string, error)
 }
