@@ -36,14 +36,17 @@ func (c *Controllers) CreateRoutes() http.Handler {
 	router := chi.NewRouter()
 	router.Use(middleware.ContentTypeJSON(c.log), middleware2.Recoverer)
 	router.Route("/api", func(r chi.Router) {
-		r.Mount("/", c.auth.createRoutes())
-	})
-	router.Route("/test", func(r chi.Router) {
-		r.Use(middleware.AuthorizationHandler(c.log, c.auth.service))
-		r.Post("/", func(writer http.ResponseWriter, request *http.Request) {
-			writer.WriteHeader(http.StatusCreated)
-			writer.Write([]byte("asdasdasdasdasdas"))
+		r.Route("/", func(r chi.Router) {
+			r.Mount("/", c.auth.createRoutes())
+		})
+		r.Group(func(r chi.Router) {
+			r.Use(middleware.AuthorizationHandler(c.log, c.auth.service))
+			r.Post("/", func(writer http.ResponseWriter, request *http.Request) {
+				writer.WriteHeader(201)
+				writer.Write([]byte("asdasdasda"))
+			})
 		})
 	})
+
 	return router
 }

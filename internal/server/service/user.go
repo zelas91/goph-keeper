@@ -73,7 +73,7 @@ func (a *auth) ParserToken(ctx context.Context, tokenString string) (int, error)
 	val, ok := a.cache.Get(tokenString)
 	if ok {
 		user := val.(entities.User)
-		return user.Id, nil
+		return user.ID, nil
 	}
 
 	user, err := a.repo.GetUser(ctx, entities.User{Login: claims.Login})
@@ -83,7 +83,7 @@ func (a *auth) ParserToken(ctx context.Context, tokenString string) (int, error)
 
 	a.cache.Set(tokenString, user, cache.DefaultExpiration)
 
-	return user.Id, nil
+	return user.ID, nil
 }
 
 func generateJwt(login string) (string, error) {

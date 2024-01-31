@@ -3,7 +3,7 @@ package entities
 import "time"
 
 type Card struct {
-	Id        int       `db:"id"`
+	ID        int       `db:"id"`
 	Version   int       `db:"version"`
 	Number    string    `db:"number"`
 	ExpiredAt string    `db:"expired_at"`

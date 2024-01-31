@@ -9,7 +9,7 @@ func EntitiesUserInModelUser(user entities.User) models.User {
 	return models.User{
 		Login:    user.Login,
 		Password: user.Password,
-		Id:       user.Id,
+		ID:       user.ID,
 	}
 
 }
@@ -18,7 +18,7 @@ func ModelUserInEntitiesUser(user models.User) entities.User {
 	return entities.User{
 		Login:    user.Login,
 		Password: user.Password,
-		Id:       user.Id,
+		ID:       user.ID,
 	}
 
 }
