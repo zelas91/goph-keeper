@@ -27,6 +27,7 @@ func main() {
 
 	handlers := controllers.New(log,
 		controllers.WithAuthUseService(serv),
+		controllers.WithCardUseService(nil),
 	)
 
 	router := chi.NewRouter()

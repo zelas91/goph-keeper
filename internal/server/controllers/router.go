@@ -6,11 +6,14 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/zelas91/goph-keeper/internal/logger"
 	"github.com/zelas91/goph-keeper/internal/server/middleware"
+	"github.com/zelas91/goph-keeper/internal/server/types"
 	"net/http"
+	"strconv"
 )
 
 type Controllers struct {
 	*auth
+	*сreditCard
 	log   logger.Logger
 	valid *validator.Validate
 }
@@ -31,6 +34,11 @@ func WithAuthUseService(us userService) func(c *Controllers) {
 		c.auth = &auth{service: us, valid: c.valid, log: c.log}
 	}
 }
+func WithCardUseService(cs cardService) func(c *Controllers) {
+	return func(c *Controllers) {
+		c.сreditCard = &сreditCard{service: cs, valid: c.valid, log: c.log}
+	}
+}
 
 func (c *Controllers) CreateRoutes() http.Handler {
 	router := chi.NewRouter()
@@ -41,9 +49,10 @@ func (c *Controllers) CreateRoutes() http.Handler {
 		})
 		r.Group(func(r chi.Router) {
 			r.Use(middleware.AuthorizationHandler(c.log, c.auth.service))
-			r.Post("/", func(writer http.ResponseWriter, request *http.Request) {
-				writer.WriteHeader(201)
-				writer.Write([]byte("asdasdasda"))
+			r.Post("/", func(w http.ResponseWriter, r *http.Request) {
+				w.WriteHeader(201)
+				u := r.Context().Value(types.UserIDKey).(int)
+				w.Write([]byte(strconv.Itoa(u)))
 			})
 		})
 	})
