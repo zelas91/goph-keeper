@@ -12,7 +12,7 @@ import (
 )
 
 type Command struct {
-	*user
+	*authorization
 	in *bufio.Reader
 }
 
@@ -20,7 +20,7 @@ func (c *Command) Start() {
 	var auth bool
 	for {
 		if !auth {
-			err := c.user.registerAndLoginCommand()
+			err := c.authorization.registerAndLoginCommand()
 			auth = err == nil
 			if err != nil {
 				fmt.Println(err)
@@ -58,7 +58,7 @@ func (c *Command) workingWithData() error {
 
 	switch command {
 	case 1:
-		return c.s.GetCardAll()
+		return c.authService.GetCardAll()
 	default:
 		return errors.New("не верный выбор операции")
 	}
@@ -66,7 +66,7 @@ func (c *Command) workingWithData() error {
 
 func WithUserCommand(us userService) func(c *Command) {
 	return func(c *Command) {
-		c.user = &user{s: us, in: c.in}
+		c.authorization = &authorization{authService: us, in: c.in}
 	}
 }
 

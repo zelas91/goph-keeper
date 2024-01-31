@@ -7,9 +7,9 @@ import (
 	"github.com/zelas91/goph-keeper/internal/server/models"
 )
 
-type user struct {
-	in *bufio.Reader
-	s  userService
+type authorization struct {
+	in          *bufio.Reader
+	authService userService
 }
 
 type userService interface {
@@ -18,7 +18,7 @@ type userService interface {
 	GetCardAll() error
 }
 
-func (u *user) registerAndLoginCommand() error {
+func (u *authorization) registerAndLoginCommand() error {
 	fmt.Println("Выберите: 1 - Регистрация, 2 - Вход")
 	command, err := commandInt(u.in)
 
@@ -41,20 +41,20 @@ func (u *user) registerAndLoginCommand() error {
 	return nil
 }
 
-func (u *user) signIn() error {
+func (u *authorization) signIn() error {
 	user, err := newUserModels(u.in)
 	if err != nil {
 		return err
 	}
-	return u.s.SignIn(user)
+	return u.authService.SignIn(user)
 }
 
-func (u *user) signUp() error {
+func (u *authorization) signUp() error {
 	user, err := newUserModels(u.in)
 	if err != nil {
 		return err
 	}
-	return u.s.SignUp(user)
+	return u.authService.SignUp(user)
 
 }
 
