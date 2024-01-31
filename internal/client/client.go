@@ -69,10 +69,11 @@ func (c *Client) init() {
 }
 
 func (c *Client) registerCommandAuth() {
+	tag := "authorization"
 	c.cm.RegisterCommand("login", "login into the program with an existing user",
-		c.auth.SignIn, "login <login> <password>")
+		c.auth.SignIn, "login <login> <password>", tag)
 	c.cm.RegisterCommand("registration", "new user and login",
-		c.auth.SignUp, "login <login> <password>")
+		c.auth.SignUp, "login <login> <password>", tag)
 }
 func commandParsing(in *bufio.Reader) ([]string, error) {
 	choice, err := in.ReadString('\n')

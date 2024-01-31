@@ -5,6 +5,7 @@ import (
 	"fmt"
 	error2 "github.com/zelas91/goph-keeper/internal/client/error"
 	"os"
+	"text/tabwriter"
 )
 
 type command struct {
@@ -12,6 +13,7 @@ type command struct {
 	Description string
 	Exec        func(args []string) error
 	help        string
+	tag         string
 }
 
 type CommandManager struct {
@@ -30,6 +32,7 @@ func (c *CommandManager) RegisterCommand(
 	description string,
 	exec func(args []string) error,
 	help string,
+	tag string,
 
 ) {
 	cmd := command{
@@ -37,6 +40,7 @@ func (c *CommandManager) RegisterCommand(
 		Description: description,
 		Exec:        exec,
 		help:        help,
+		tag:         tag,
 	}
 
 	c.commands[name] = cmd
@@ -52,7 +56,7 @@ func (c *CommandManager) ExecCommandWithName(name string, args []string) error {
 	err := cmd.Exec(args)
 
 	if errors.Is(err, error2.ErrInvalidCommand) {
-		fmt.Println("Usage:", cmd.help)
+		fmt.Println("help command:", cmd.help)
 		return nil
 	}
 
@@ -60,17 +64,35 @@ func (c *CommandManager) ExecCommandWithName(name string, args []string) error {
 }
 
 func (c *CommandManager) initBaseCommands() {
-	c.RegisterCommand("help", "list all commands", c.help, "help")
-	c.RegisterCommand("exit", "close program", c.exit, "exit")
+	tag := "system"
+	c.RegisterCommand("help", "list all commands", c.help, "help", tag)
+	c.RegisterCommand("exit", "close program", c.exit, "exit", tag)
 }
 
 func (c *CommandManager) help(args []string) error {
-	for n, c := range c.commands {
-		fmt.Println("command name:", n, "description:", c.Description)
+	w := tabwriter.NewWriter(os.Stdout, 0, 0, 0, ' ', tabwriter.TabIndent)
+	fmt.Fprintln(w, "-----------------------------------------------------------")
+
+	com := make(map[string][]string)
+
+	for _, v := range c.commands {
+		com[v.tag] = append(com[v.tag],
+			fmt.Sprintf("command: '%s'\t Description: %s.\t use: %s",
+				v.Name, v.Description, v.help))
 	}
-	fmt.Println("-----------------------------------------------------------")
+	for n, v := range com {
+		fmt.Fprintln(w, "type", n)
+
+		for _, command := range v {
+			fmt.Fprintln(w, "\t", command)
+		}
+		fmt.Fprintln(w, "===========================================================")
+	}
+	fmt.Fprintln(w, "-----------------------------------------------------------")
+	w.Flush()
 	return nil
 }
+
 func (c *CommandManager) exit(args []string) error {
 	return os.ErrProcessDone
 }
