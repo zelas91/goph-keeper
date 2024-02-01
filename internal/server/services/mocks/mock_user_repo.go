@@ -35,31 +35,31 @@ func (m *MockuserRepo) EXPECT() *MockuserRepoMockRecorder {
 	return m.recorder
 }
 
-// CreateUser mocks base method.
-func (m *MockuserRepo) CreateUser(ctx context.Context, user entities.User) error {
+// Create mocks base method.
+func (m *MockuserRepo) Create(ctx context.Context, user entities.User) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "CreateUser", ctx, user)
+	ret := m.ctrl.Call(m, "Create", ctx, user)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
-// CreateUser indicates an expected call of CreateUser.
-func (mr *MockuserRepoMockRecorder) CreateUser(ctx, user interface{}) *gomock.Call {
+// Create indicates an expected call of Create.
+func (mr *MockuserRepoMockRecorder) Create(ctx, user interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateUser", reflect.TypeOf((*MockuserRepo)(nil).CreateUser), ctx, user)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockuserRepo)(nil).Create), ctx, user)
 }
 
-// GetUser mocks base method.
-func (m *MockuserRepo) GetUser(ctx context.Context, user entities.User) (entities.User, error) {
+// FindUserByLogin mocks base method.
+func (m *MockuserRepo) FindUserByLogin(ctx context.Context, user entities.User) (entities.User, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetUser", ctx, user)
+	ret := m.ctrl.Call(m, "FindUserByLogin", ctx, user)
 	ret0, _ := ret[0].(entities.User)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// GetUser indicates an expected call of GetUser.
-func (mr *MockuserRepoMockRecorder) GetUser(ctx, user interface{}) *gomock.Call {
+// FindUserByLogin indicates an expected call of FindUserByLogin.
+func (mr *MockuserRepoMockRecorder) FindUserByLogin(ctx, user interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUser", reflect.TypeOf((*MockuserRepo)(nil).GetUser), ctx, user)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindUserByLogin", reflect.TypeOf((*MockuserRepo)(nil).FindUserByLogin), ctx, user)
 }

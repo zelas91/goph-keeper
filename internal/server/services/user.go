@@ -1,4 +1,4 @@
-package service
+package services
 
 import (
 	"errors"
@@ -26,8 +26,8 @@ type Claims struct {
 
 //go:generate mockgen -package mocks -destination=./mocks/mock_user_repo.go -source=user.go -package=mock
 type userRepo interface {
-	CreateUser(ctx context.Context, user entities.User) error
-	GetUser(ctx context.Context, user entities.User) (entities.User, error)
+	Create(ctx context.Context, user entities.User) error
+	FindUserByLogin(ctx context.Context, user entities.User) (entities.User, error)
 }
 
 func (a *auth) CreateUser(ctx context.Context, user models.User) error {
@@ -36,10 +36,10 @@ func (a *auth) CreateUser(ctx context.Context, user models.User) error {
 		return errors.New("generate password hash err")
 	}
 
-	return a.repo.CreateUser(ctx, entities.User{Login: user.Login, Password: string(hashedPassword)})
+	return a.repo.Create(ctx, entities.User{Login: user.Login, Password: string(hashedPassword)})
 }
 func (a *auth) CreateToken(ctx context.Context, authUser models.User) (string, error) {
-	user, err := a.repo.GetUser(ctx, utils.ModelUserInEntitiesUser(authUser))
+	user, err := a.repo.FindUserByLogin(ctx, utils.ToEntitiesUser(authUser))
 	if err != nil {
 		return "", err
 	}
@@ -76,7 +76,7 @@ func (a *auth) ParserToken(ctx context.Context, tokenString string) (int, error)
 		return user.ID, nil
 	}
 
-	user, err := a.repo.GetUser(ctx, entities.User{Login: claims.Login})
+	user, err := a.repo.FindUserByLogin(ctx, entities.User{Login: claims.Login})
 	if err != nil {
 		return 0, err
 	}

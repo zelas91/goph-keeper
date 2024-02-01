@@ -7,12 +7,16 @@ import (
 )
 
 type Repository struct {
-	*auth
+	Auth       *auth
+	CreditCard *creditCard
 }
 
 func New(log logger.Logger, db *sqlx.DB) *Repository {
 	tm := newTm(log, db)
-	return &Repository{auth: newAuth(tm)}
+	return &Repository{
+		Auth:       &auth{tm: tm},
+		CreditCard: &creditCard{tm: tm},
+	}
 }
 
 func NewPostgresDB(url string) (*sqlx.DB, error) {

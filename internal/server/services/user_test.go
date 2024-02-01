@@ -1,4 +1,4 @@
-package service
+package services
 
 import (
 	"database/sql"
@@ -10,7 +10,7 @@ import (
 	"github.com/zelas91/goph-keeper/internal/server/models"
 	"github.com/zelas91/goph-keeper/internal/server/repository"
 	"github.com/zelas91/goph-keeper/internal/server/repository/entities"
-	mock "github.com/zelas91/goph-keeper/internal/server/service/mocks"
+	mock "github.com/zelas91/goph-keeper/internal/server/services/mocks"
 	"golang.org/x/crypto/bcrypt"
 	"golang.org/x/net/context"
 	"testing"
@@ -56,7 +56,7 @@ func TestCreateUser(t *testing.T) {
 			},
 			mockCreate: func(s *mock.MockuserRepo, user entities.User) {
 				eq := eqUserMatcher{login: user.Login, password: user.Password}
-				s.EXPECT().CreateUser(gomock.Any(), eq).Return(nil)
+				s.EXPECT().Create(gomock.Any(), eq).Return(nil)
 			},
 			want: nil,
 		},
@@ -68,7 +68,7 @@ func TestCreateUser(t *testing.T) {
 			},
 			mockCreate: func(s *mock.MockuserRepo, user entities.User) {
 				eq := eqUserMatcher{login: user.Login, password: user.Password}
-				s.EXPECT().CreateUser(gomock.Any(), eq).Return(repository.ErrDuplicate)
+				s.EXPECT().Create(gomock.Any(), eq).Return(repository.ErrDuplicate)
 			},
 			want: repository.ErrDuplicate,
 		},
@@ -80,7 +80,7 @@ func TestCreateUser(t *testing.T) {
 			},
 			mockCreate: func(s *mock.MockuserRepo, user entities.User) {
 				eq := eqUserMatcher{login: user.Login, password: user.Password}
-				s.EXPECT().CreateUser(gomock.Any(), eq).Return(sql.ErrNoRows)
+				s.EXPECT().Create(gomock.Any(), eq).Return(sql.ErrNoRows)
 			},
 			want: sql.ErrNoRows,
 		},
@@ -94,7 +94,7 @@ func TestCreateUser(t *testing.T) {
 				test.mockCreate(repo, test.user)
 			}
 			serv := New(WithAuthUseRepository(repo))
-			res := serv.CreateUser(context.TODO(), models.User{Login: test.user.Login, Password: test.user.Password})
+			res := serv.Auth.CreateUser(context.TODO(), models.User{Login: test.user.Login, Password: test.user.Password})
 			fmt.Println(res)
 			assert.Equal(t, test.want, res)
 		})
@@ -131,7 +131,7 @@ func TestCreateToken(t *testing.T) {
 					Login:    user.Login,
 					Password: string(hash),
 				}
-				s.EXPECT().GetUser(gomock.Any(), user).Return(us, nil)
+				s.EXPECT().FindUserByLogin(gomock.Any(), user).Return(us, nil)
 			},
 		},
 		{
@@ -145,7 +145,7 @@ func TestCreateToken(t *testing.T) {
 				err:   errors.New("user not found"),
 			},
 			mockGet: func(s *mock.MockuserRepo, user entities.User) {
-				s.EXPECT().GetUser(gomock.Any(), user).Return(entities.User{}, errors.New("user not found"))
+				s.EXPECT().FindUserByLogin(gomock.Any(), user).Return(entities.User{}, errors.New("user not found"))
 			},
 		},
 	}
@@ -158,7 +158,7 @@ func TestCreateToken(t *testing.T) {
 				test.mockGet(repo, test.user)
 			}
 			serv := New(WithAuthUseRepository(repo))
-			tokenStr, err := serv.CreateToken(context.TODO(), models.User{Login: test.user.Login,
+			tokenStr, err := serv.Auth.CreateToken(context.TODO(), models.User{Login: test.user.Login,
 				Password: test.user.Password})
 
 			assert.Equal(t, test.want.err, err)

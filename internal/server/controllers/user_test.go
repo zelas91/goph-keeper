@@ -12,8 +12,8 @@ import (
 	"github.com/zelas91/goph-keeper/internal/server/models"
 	"github.com/zelas91/goph-keeper/internal/server/repository"
 	"github.com/zelas91/goph-keeper/internal/server/repository/entities"
-	"github.com/zelas91/goph-keeper/internal/server/service"
-	"github.com/zelas91/goph-keeper/internal/server/service/mocks"
+	"github.com/zelas91/goph-keeper/internal/server/services"
+	"github.com/zelas91/goph-keeper/internal/server/services/mocks"
 	"golang.org/x/crypto/bcrypt"
 	"net/http"
 	"net/http/httptest"
@@ -63,7 +63,7 @@ func TestSignUp(t *testing.T) {
 			content: "application/json",
 			mockBehaviorCreateUser: func(s *mock.MockuserRepo, user entities.User) {
 				eq := eqUserMatcher{login: user.Login, password: user.Password}
-				s.EXPECT().CreateUser(gomock.Any(), eq).Return(nil)
+				s.EXPECT().Create(gomock.Any(), eq).Return(nil)
 			},
 			mockBehaviorGetUser: func(s *mock.MockuserRepo, user entities.User) {
 				hash, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
@@ -75,7 +75,7 @@ func TestSignUp(t *testing.T) {
 					Login:    user.Login,
 					Password: string(hash),
 				}
-				s.EXPECT().GetUser(gomock.Any(), user).Return(us, nil)
+				s.EXPECT().FindUserByLogin(gomock.Any(), user).Return(us, nil)
 			},
 			login:    "user",
 			password: "12345678",
@@ -102,7 +102,7 @@ func TestSignUp(t *testing.T) {
 			content: "application/json",
 			mockBehaviorCreateUser: func(s *mock.MockuserRepo, user entities.User) {
 
-				s.EXPECT().CreateUser(gomock.Any(),
+				s.EXPECT().Create(gomock.Any(),
 					gomock.Any()).Return(repository.ErrDuplicate)
 			},
 			login:    "user",
@@ -119,7 +119,7 @@ func TestSignUp(t *testing.T) {
 			url:     "/api/signup",
 			content: "application/json",
 			mockBehaviorCreateUser: func(s *mock.MockuserRepo, user entities.User) {
-				s.EXPECT().CreateUser(gomock.Any(),
+				s.EXPECT().Create(gomock.Any(),
 					gomock.Any()).Return(sql.ErrNoRows)
 			},
 			login:    "user",
@@ -138,11 +138,11 @@ func TestSignUp(t *testing.T) {
 			content: "application/json",
 			mockBehaviorCreateUser: func(s *mock.MockuserRepo, user entities.User) {
 				eq := eqUserMatcher{login: user.Login, password: user.Password}
-				s.EXPECT().CreateUser(gomock.Any(), eq).Return(nil)
+				s.EXPECT().Create(gomock.Any(), eq).Return(nil)
 			},
 			mockBehaviorGetUser: func(s *mock.MockuserRepo, user entities.User) {
 
-				s.EXPECT().GetUser(gomock.Any(), user).Return(entities.User{}, sql.ErrNoRows)
+				s.EXPECT().FindUserByLogin(gomock.Any(), user).Return(entities.User{}, sql.ErrNoRows)
 			},
 			login:    "user",
 			password: "12345678",
@@ -171,7 +171,7 @@ func TestSignUp(t *testing.T) {
 				test.mockBehaviorGetUser(repo, test.user)
 			}
 
-			handler := New(logger.New(""), WithAuthUseService(service.New(service.WithAuthUseRepository(repo))))
+			handler := New(logger.New(""), WithAuthUseService(services.New(services.WithAuthUseRepository(repo)).Auth))
 
 			body, err := json.Marshal(test.user)
 			assert.NoError(t, err, "Body write error")
@@ -217,7 +217,7 @@ func TestSignIn(t *testing.T) {
 					Login:    user.Login,
 					Password: string(hash),
 				}
-				s.EXPECT().GetUser(gomock.Any(), user).Return(us, nil)
+				s.EXPECT().FindUserByLogin(gomock.Any(), user).Return(us, nil)
 			},
 			user: entities.User{
 				Login:    "user",
@@ -242,7 +242,7 @@ func TestSignIn(t *testing.T) {
 			method:  http.MethodPost,
 			mockBehaviorGetUser: func(s *mock.MockuserRepo, user entities.User) {
 
-				s.EXPECT().GetUser(gomock.Any(), user).Return(entities.User{}, sql.ErrNoRows)
+				s.EXPECT().FindUserByLogin(gomock.Any(), user).Return(entities.User{}, sql.ErrNoRows)
 			},
 			user: entities.User{
 				Login:    "user",
@@ -265,7 +265,7 @@ func TestSignIn(t *testing.T) {
 			if test.mockBehaviorGetUser != nil {
 				test.mockBehaviorGetUser(repo, test.user)
 			}
-			handler := New(logger.New(""), WithAuthUseService(service.New(service.WithAuthUseRepository(repo))))
+			handler := New(logger.New(""), WithAuthUseService(services.New(services.WithAuthUseRepository(repo)).Auth))
 
 			body, err := json.Marshal(test.user)
 			assert.NoError(t, err, "Body write error")

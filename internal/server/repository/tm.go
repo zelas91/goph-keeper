@@ -31,7 +31,6 @@ func (t *tm) do(ctx context.Context, fn func(ctx context.Context) error) error {
 	if err != nil {
 		return err
 	}
-
 	defer func() {
 		if err = tx.Rollback(); err != nil && !errors.Is(sql.ErrTxDone, err) {
 			t.log.Errorf("Rollback err: %v", err)
@@ -61,4 +60,5 @@ type conn interface {
 	ExecContext(ctx context.Context, query string, args ...any) (sql.Result, error)
 	GetContext(ctx context.Context, dest interface{}, query string, args ...interface{}) error
 	SelectContext(ctx context.Context, dest interface{}, query string, args ...interface{}) error
+	NamedExecContext(ctx context.Context, query string, arg interface{}) (sql.Result, error)
 }

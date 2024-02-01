@@ -5,7 +5,7 @@ import (
 	"github.com/zelas91/goph-keeper/internal/logger"
 	"github.com/zelas91/goph-keeper/internal/server/controllers"
 	"github.com/zelas91/goph-keeper/internal/server/repository"
-	"github.com/zelas91/goph-keeper/internal/server/service"
+	"github.com/zelas91/goph-keeper/internal/server/services"
 	"net/http"
 )
 
@@ -21,13 +21,14 @@ func main() {
 
 	repo := repository.New(log, db)
 
-	serv := service.New(
-		service.WithAuthUseRepository(repo),
+	serv := services.New(
+		services.WithAuthUseRepository(repo.Auth),
+		services.WithCardUseRepository(repo.CreditCard),
 	)
 
 	handlers := controllers.New(log,
-		controllers.WithAuthUseService(serv),
-		controllers.WithCardUseService(nil),
+		controllers.WithAuthUseService(serv.Auth),
+		controllers.WithCardUseService(serv.CreditCard),
 	)
 
 	router := chi.NewRouter()

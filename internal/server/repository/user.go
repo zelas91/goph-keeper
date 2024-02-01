@@ -11,11 +11,7 @@ type auth struct {
 	tm transactionManager
 }
 
-func newAuth(tm transactionManager) *auth {
-	return &auth{tm: tm}
-}
-
-func (a *auth) CreateUser(ctx context.Context, user entities.User) error {
+func (a *auth) Create(ctx context.Context, user entities.User) error {
 
 	if _, err := a.tm.getConn(ctx).ExecContext(ctx,
 		"INSERT INTO USERS (login, password) values($1, $2)", user.Login, user.Password); err != nil {
@@ -26,7 +22,7 @@ func (a *auth) CreateUser(ctx context.Context, user entities.User) error {
 	}
 	return nil
 }
-func (a *auth) GetUser(ctx context.Context, user entities.User) (entities.User, error) {
+func (a *auth) FindUserByLogin(ctx context.Context, user entities.User) (entities.User, error) {
 	if err := a.tm.getConn(ctx).GetContext(ctx, &user,
 		"SELECT * FROM users WHERE login=$1", user.Login); err != nil {
 		return user, err
