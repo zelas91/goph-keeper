@@ -97,8 +97,8 @@ func (c *сreditCard) create() http.HandlerFunc {
 
 		card, err := c.cardFromRequestAndValid(r)
 		if err != nil {
-			c.log.Errorf("create: get card err:%v", err)
-			payload.NewErrorResponse(w, "create: get card err", http.StatusBadRequest)
+			c.log.Errorf("create: decode or validation err:%v", err)
+			payload.NewErrorResponse(w, err.Error(), http.StatusBadRequest)
 			return
 		}
 
@@ -132,8 +132,8 @@ func (c *сreditCard) update() http.HandlerFunc {
 
 		card, err := c.cardFromRequestAndValid(r)
 		if err != nil {
-			c.log.Errorf("update: get card body err:%v", err)
-			payload.NewErrorResponse(w, "update: get card body err", http.StatusBadRequest)
+			c.log.Errorf("update: decode or validation err:%v", err)
+			payload.NewErrorResponse(w, err.Error(), http.StatusBadRequest)
 			return
 		}
 

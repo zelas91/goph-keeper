@@ -30,26 +30,26 @@ type userService interface {
 func (a *auth) signUp() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if r.Body == nil {
-			payload.NewErrorResponse(w, "body is empty", http.StatusBadRequest)
+			payload.NewErrorResponse(w, "user: signup body is empty", http.StatusBadRequest)
 			return
 		}
 
 		defer func() {
 			if err := r.Body.Close(); err != nil {
-				a.log.Errorf("sign in body close err :%v", err)
+				a.log.Errorf("user: signup in body close err :%v", err)
 			}
 		}()
 
 		user, err := a.userFromRequestAndValid(r)
 		if err != nil {
-			a.log.Errorf("sign up get use err: %v", err)
+			a.log.Errorf("user: signup decode or validate err: %v", err)
 			payload.NewErrorResponse(w, err.Error(), http.StatusBadRequest)
 			return
 		}
 
 		if err = a.service.CreateUser(r.Context(), user); err != nil {
 			if errors.Is(err, repository.ErrDuplicate) {
-				a.log.Errorf("sigUp user duplicate err :%v", err)
+				a.log.Errorf("user: signup user duplicate err :%v", err)
 				payload.NewErrorResponse(w, err.Error(), http.StatusConflict)
 				return
 			}
@@ -112,10 +112,10 @@ func (a *auth) signIn() http.HandlerFunc {
 
 func (a *auth) userFromRequestAndValid(r *http.Request) (user models.User, err error) {
 	if err = json.NewDecoder(r.Body).Decode(&user); err != nil {
-		return user, fmt.Errorf("signIn json decode err:%w", err)
+		return user, fmt.Errorf("user: json decode err:%w", err)
 	}
 	if err = a.valid.Struct(user); err != nil {
-		return user, fmt.Errorf("signIn json validate err:%w", err)
+		return user, fmt.Errorf("user: validate err:%w", err)
 
 	}
 	return
