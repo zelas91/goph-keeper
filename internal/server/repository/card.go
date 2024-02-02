@@ -20,8 +20,12 @@ func (c creditCard) Create(ctx context.Context, card entities.Card) error {
 }
 
 func (c creditCard) FindCardsByUserID(ctx context.Context, userID int) ([]entities.Card, error) {
-	//TODO implement me
-	panic("implement me")
+	query := `select * from cards where user_id=$1`
+	var cards []entities.Card
+	if err := c.tm.getConn(ctx).SelectContext(ctx, &cards, query, userID); err != nil {
+		return cards, fmt.Errorf("repo: get cards err %v", err)
+	}
+	return cards, nil
 }
 
 func (c creditCard) FindCardByUserID(ctx context.Context, cardID, userID int) (entities.Card, error) {
