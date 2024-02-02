@@ -9,13 +9,15 @@ import (
 type Repository struct {
 	Auth       *auth
 	CreditCard *creditCard
+	Credential *credential
 }
 
 func New(log logger.Logger, db *sqlx.DB) *Repository {
-	tm := newTm(log, db)
+	manager := newTm(log, db)
 	return &Repository{
-		Auth:       &auth{tm: tm},
-		CreditCard: &creditCard{tm: tm},
+		Auth:       &auth{tm: manager},
+		CreditCard: &creditCard{tm: manager},
+		Credential: &credential{tm: manager},
 	}
 }
 

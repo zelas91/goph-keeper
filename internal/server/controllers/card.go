@@ -2,16 +2,15 @@ package controllers
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-playground/validator/v10"
 	"github.com/zelas91/goph-keeper/internal/logger"
+	"github.com/zelas91/goph-keeper/internal/server/helper"
 	"github.com/zelas91/goph-keeper/internal/server/models"
 	"github.com/zelas91/goph-keeper/internal/server/payload"
 	"golang.org/x/net/context"
 	"net/http"
-	"strconv"
 )
 
 type сreditCard struct {
@@ -27,21 +26,6 @@ type cardService interface {
 	Card(ctx context.Context, cardID int) (models.Card, error)
 	Delete(ctx context.Context, cardID int) error
 	Update(ctx context.Context, card models.Card) error
-}
-
-func idCard(ctx context.Context) (id int, err error) {
-	idStr := chi.URLParamFromCtx(ctx, "id")
-	if idStr == "" {
-		return id, errors.New("id not found")
-	}
-	id, err = strconv.Atoi(idStr)
-	if err != nil {
-		return id, fmt.Errorf("convert id=%s, to int err: %v", idStr, err)
-	}
-	if id == 0 {
-		return id, errors.New("id incorrect")
-	}
-	return
 }
 
 func (c *сreditCard) cards() http.HandlerFunc {
@@ -62,7 +46,7 @@ func (c *сreditCard) cards() http.HandlerFunc {
 
 func (c *сreditCard) card() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		id, err := idCard(r.Context())
+		id, err := helper.IDFromContext(r.Context())
 		if err != nil {
 			c.log.Errorf("card: get id from request err: %v", err)
 			payload.NewErrorResponse(w, "card: get id from request err", http.StatusBadRequest)
@@ -123,7 +107,7 @@ func (c *сreditCard) update() http.HandlerFunc {
 			}
 		}()
 
-		id, err := idCard(r.Context())
+		id, err := helper.IDFromContext(r.Context())
 		if err != nil {
 			c.log.Errorf("update: get id card err: %v", err)
 			payload.NewErrorResponse(w, "update: get id card err:", http.StatusBadRequest)
@@ -148,7 +132,7 @@ func (c *сreditCard) update() http.HandlerFunc {
 
 func (c *сreditCard) delete() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		id, err := idCard(r.Context())
+		id, err := helper.IDFromContext(r.Context())
 		if err != nil {
 			c.log.Errorf("get id card err: %v", err)
 			payload.NewErrorResponse(w, err.Error(), http.StatusBadRequest)
@@ -164,11 +148,11 @@ func (c *сreditCard) delete() http.HandlerFunc {
 
 func (c *сreditCard) cardFromRequestAndValid(r *http.Request) (card models.Card, err error) {
 	if err = json.NewDecoder(r.Body).Decode(&card); err != nil {
-		return card, fmt.Errorf("create card  json decode err:%v", err)
+		return card, fmt.Errorf("card  json decode err:%v", err)
 	}
 
 	if err = c.valid.Struct(card); err != nil {
-		return card, fmt.Errorf("create card validate err: %v", err)
+		return card, fmt.Errorf("card validate err: %v", err)
 	}
 	return
 }

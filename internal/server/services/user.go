@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/patrickmn/go-cache"
+	"github.com/zelas91/goph-keeper/internal/server/helper"
 	"github.com/zelas91/goph-keeper/internal/server/models"
 	"github.com/zelas91/goph-keeper/internal/server/repository/entities"
-	"github.com/zelas91/goph-keeper/internal/utils"
 	"golang.org/x/crypto/bcrypt"
 	"golang.org/x/net/context"
 	"time"
@@ -39,7 +39,7 @@ func (a *auth) CreateUser(ctx context.Context, user models.User) error {
 	return a.repo.Create(ctx, entities.User{Login: user.Login, Password: string(hashedPassword)})
 }
 func (a *auth) CreateToken(ctx context.Context, authUser models.User) (string, error) {
-	user, err := a.repo.FindUserByLogin(ctx, utils.ToEntitiesUser(authUser))
+	user, err := a.repo.FindUserByLogin(ctx, helper.ToEntitiesUser(authUser))
 	if err != nil {
 		return "", err
 	}

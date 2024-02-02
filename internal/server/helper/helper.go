@@ -1,4 +1,4 @@
-package utils
+package helper
 
 import (
 	"github.com/zelas91/goph-keeper/internal/server/models"
@@ -43,6 +43,28 @@ func ToEntitiesCard(card models.Card) entities.Card {
 		Cvv:       card.Cvv,
 		ExpiredAt: card.ExpiredAt,
 		Number:    card.Number,
+	}
+
+}
+
+func ToModelUserCredential(uc entities.UserCredentials) models.UserCredentials {
+	return models.UserCredentials{
+		ID:       uc.ID,
+		UserId:   uc.UserId,
+		Version:  uc.Version,
+		Password: uc.Password,
+		Login:    uc.Login,
+	}
+
+}
+
+func ToEntitiesUserCredential(uc models.UserCredentials) entities.UserCredentials {
+	return entities.UserCredentials{
+		ID:       uc.ID,
+		UserId:   uc.UserId,
+		Version:  uc.Version,
+		Password: uc.Password,
+		Login:    uc.Login,
 	}
 
 }

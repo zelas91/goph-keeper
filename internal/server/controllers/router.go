@@ -11,10 +11,11 @@ import (
 )
 
 type Controllers struct {
-	auth  *auth
-	card  *сreditCard
-	log   logger.Logger
-	valid *validator.Validate
+	auth       *auth
+	card       *сreditCard
+	credential *credential
+	log        logger.Logger
+	valid      *validator.Validate
 }
 
 func New(log logger.Logger, options ...func(c *Controllers)) *Controllers {
@@ -33,12 +34,18 @@ func WithAuthUseService(us userService) func(c *Controllers) {
 		c.auth = &auth{service: us, valid: c.valid, log: c.log}
 	}
 }
+
 func WithCardUseService(cs cardService) func(c *Controllers) {
 	return func(c *Controllers) {
 		c.card = &сreditCard{service: cs, valid: c.valid, log: c.log}
 	}
 }
 
+func WithUserCredentialUseService(cs credentialService) func(c *Controllers) {
+	return func(c *Controllers) {
+		c.credential = &credential{service: cs, valid: c.valid, log: c.log}
+	}
+}
 func (c *Controllers) CreateRoutes() http.Handler {
 	router := chi.NewRouter()
 	router.Use(middleware.ContentTypeJSON(c.log), middleware2.Recoverer)
@@ -48,6 +55,7 @@ func (c *Controllers) CreateRoutes() http.Handler {
 			r.Use(middleware.AuthorizationHandler(c.log, c.auth.service))
 			r.Group(func(r chi.Router) {
 				r.Mount("/card", c.card.createRoutes())
+				r.Mount("/credential", c.credential.createRoutes())
 			})
 		})
 	})

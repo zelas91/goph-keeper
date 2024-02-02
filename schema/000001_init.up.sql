@@ -6,6 +6,15 @@ create table users
     created_at timestamp not null default now()
 );
 
+create or replace function update_version()
+    returns trigger as $$
+begin
+    new.update_at = now();
+    new.version = old.version + 1;
+    return new;
+end;
+$$ language plpgsql;
+
 create table cards
 (
     id  bigserial not null unique primary key ,
@@ -18,16 +27,24 @@ create table cards
     update_at timestamp not null default now()
 );
 
-create or replace function update_cards()
-    returns trigger as $$
-begin
-    new.update_at = now();
-    new.version = old.version + 1;
-    return new;
-end;
-$$ language plpgsql;
-
 create trigger update_cards_trigger
     before update on cards
     for each row
-execute function update_cards();
+execute function update_version();
+
+create table user_credentials
+(
+    id  bigserial not null unique primary key ,
+    user_id int references users (id) not null ,
+    login varchar unique not null ,
+    password varchar not null,
+    version int default 1,
+    created_at timestamp not null default now(),
+    update_at timestamp not null default now()
+);
+
+
+create trigger update_user_credentials_trigger
+    before update on user_credentials
+    for each row
+execute function update_version();
