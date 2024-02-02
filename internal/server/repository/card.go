@@ -11,9 +11,8 @@ type creditCard struct {
 }
 
 func (c creditCard) Create(ctx context.Context, card entities.Card) error {
-	query := `
-	INSERT INTO CARDS (number,expired_at,cvv,user_id)
-	VALUES (:number,:expired_at,:cvv,:user_id);`
+	query := `insert into cards (number,expired_at,cvv,user_id)
+		values (:number,:expired_at,:cvv,:user_id);`
 	if _, err := c.tm.getConn(ctx).NamedExecContext(ctx, query, card); err != nil {
 		return fmt.Errorf("repo card create err: %v", err)
 	}
@@ -26,13 +25,20 @@ func (c creditCard) FindCardsByUserID(ctx context.Context, userID int) ([]entiti
 }
 
 func (c creditCard) FindCardByUserID(ctx context.Context, cardID, userID int) (entities.Card, error) {
-	//TODO implement me
-	panic("implement me")
+	query := `select * from cards where id=$1 and user_id=$2`
+	var card entities.Card
+	if err := c.tm.getConn(ctx).GetContext(ctx, &card, query, cardID, userID); err != nil {
+		return card, fmt.Errorf("repo: card get id=%d  err: %v", cardID, err)
+	}
+	return card, nil
 }
 
 func (c creditCard) Delete(ctx context.Context, cardID, userID int) error {
-	//TODO implement me
-	panic("implement me")
+	query := `delete from cards where id=$1 and user_id=$2`
+	if _, err := c.tm.getConn(ctx).ExecContext(ctx, query, cardID, userID); err != nil {
+		return fmt.Errorf("repo card delete err: %v", err)
+	}
+	return nil
 }
 
 func (c creditCard) Update(ctx context.Context, card entities.Card) error {
@@ -41,11 +47,11 @@ func (c creditCard) Update(ctx context.Context, card entities.Card) error {
 		if _, err := c.tm.getConn(ctx).ExecContext(ctx, query, card.ID); err != nil {
 			return fmt.Errorf("repo card update block err :%v", err)
 		}
-		query = `UPDATE CARDS SET
+		query = `update cards set
 				number=:number,
 				cvv=:cvv,
 				expired_at=:expired_at
-			WHERE
+			where
 				id=:id and user_id=:user_id;`
 		if _, err := c.tm.getConn(ctx).NamedExecContext(ctx, query, card); err != nil {
 			return fmt.Errorf("repo card update err: %v", err)

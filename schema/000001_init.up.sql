@@ -10,7 +10,7 @@ create table cards
 (
     id  bigserial not null unique primary key ,
     user_id int references users (id) not null ,
-    number varchar not null,
+    number varchar not null unique,
     expired_at varchar not null,
     cvv varchar not null,
     version int default 1,
