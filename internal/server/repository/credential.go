@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"errors"
 	"fmt"
 	"github.com/zelas91/goph-keeper/internal/server/repository/entities"
 	"golang.org/x/net/context"
@@ -19,7 +20,7 @@ func (c credential) Create(ctx context.Context, uc entities.UserCredentials) err
 	return nil
 }
 
-func (c credential) FindCredentialsByUserID(ctx context.Context, userID int) ([]entities.UserCredentials, error) {
+func (c credential) FindAllByUserID(ctx context.Context, userID int) ([]entities.UserCredentials, error) {
 	query := `select * from user_credentials where user_id=$1`
 	var ucs []entities.UserCredentials
 	if err := c.tm.getConn(ctx).SelectContext(ctx, &ucs, query, userID); err != nil {
@@ -55,9 +56,17 @@ func (c credential) Update(ctx context.Context, uc entities.UserCredentials) err
 				login=:login,
 				password=:password
 			where
-				id=:id and user_id=:user_id;`
-		if _, err := c.tm.getConn(ctx).NamedExecContext(ctx, query, uc); err != nil {
+				id=:id and user_id=:user_id and version=:version;`
+		result, err := c.tm.getConn(ctx).NamedExecContext(ctx, query, uc)
+		if err != nil {
 			return fmt.Errorf("repo credentials update err: %v", err)
+		}
+		rowsAffected, err := result.RowsAffected()
+		if err != nil {
+			return fmt.Errorf("repo credentials update result err: %v", err)
+		}
+		if rowsAffected == 0 {
+			return errors.New("the versions on the server and client do not match")
 		}
 		return nil
 	})

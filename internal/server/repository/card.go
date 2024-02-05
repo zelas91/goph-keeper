@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"errors"
 	"fmt"
 	"github.com/zelas91/goph-keeper/internal/server/repository/entities"
 	"golang.org/x/net/context"
@@ -19,7 +20,7 @@ func (c creditCard) Create(ctx context.Context, card entities.Card) error {
 	return nil
 }
 
-func (c creditCard) FindCardsByUserID(ctx context.Context, userID int) ([]entities.Card, error) {
+func (c creditCard) FindAllByUserID(ctx context.Context, userID int) ([]entities.Card, error) {
 	query := `select * from cards where user_id=$1`
 	var cards []entities.Card
 	if err := c.tm.getConn(ctx).SelectContext(ctx, &cards, query, userID); err != nil {
@@ -56,9 +57,17 @@ func (c creditCard) Update(ctx context.Context, card entities.Card) error {
 				cvv=:cvv,
 				expired_at=:expired_at
 			where
-				id=:id and user_id=:user_id;`
-		if _, err := c.tm.getConn(ctx).NamedExecContext(ctx, query, card); err != nil {
+				id=:id and user_id=:user_id and version=:version;`
+		result, err := c.tm.getConn(ctx).NamedExecContext(ctx, query, card)
+		if err != nil {
 			return fmt.Errorf("repo card update err: %v", err)
+		}
+		rowsAffected, err := result.RowsAffected()
+		if err != nil {
+			return fmt.Errorf("repo card update result err: %v", err)
+		}
+		if rowsAffected == 0 {
+			return errors.New("the versions on the server and client do not match")
 		}
 		return nil
 	})

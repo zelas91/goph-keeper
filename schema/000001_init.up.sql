@@ -48,3 +48,19 @@ create trigger update_user_credentials_trigger
     before update on user_credentials
     for each row
 execute function update_version();
+
+create table text_data
+(
+    id  bigserial not null unique primary key ,
+    user_id int references users (id) not null ,
+    large_text text not null ,
+    version int default 1,
+    created_at timestamp not null default now(),
+    update_at timestamp not null default now()
+);
+
+
+create trigger update_text_data_trigger
+    before update on text_data
+    for each row
+execute function update_version();

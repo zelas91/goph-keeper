@@ -14,6 +14,7 @@ type Controllers struct {
 	auth       *auth
 	card       *сreditCard
 	credential *credential
+	textData   *textData
 	log        logger.Logger
 	valid      *validator.Validate
 }
@@ -46,6 +47,12 @@ func WithUserCredentialUseService(cs credentialService) func(c *Controllers) {
 		c.credential = &credential{service: cs, valid: c.valid, log: c.log}
 	}
 }
+
+func WithTextUseService(td textDataService) func(c *Controllers) {
+	return func(c *Controllers) {
+		c.textData = &textData{service: td, valid: c.valid, log: c.log}
+	}
+}
 func (c *Controllers) CreateRoutes() http.Handler {
 	router := chi.NewRouter()
 	router.Use(middleware.ContentTypeJSON(c.log), middleware2.Recoverer)
@@ -56,6 +63,7 @@ func (c *Controllers) CreateRoutes() http.Handler {
 			r.Group(func(r chi.Router) {
 				r.Mount("/card", c.card.createRoutes())
 				r.Mount("/credential", c.credential.createRoutes())
+				r.Mount("/text", c.textData.createRoutes())
 			})
 		})
 	})

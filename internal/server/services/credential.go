@@ -16,7 +16,7 @@ type credential struct {
 //go:generate mockgen -package mocks -destination=./mocks/mock_credential_repo.go -source=credential.go -package=mock
 type credentialRepo interface {
 	Create(ctx context.Context, uc entities.UserCredentials) error
-	FindCredentialsByUserID(ctx context.Context, userID int) ([]entities.UserCredentials, error)
+	FindAllByUserID(ctx context.Context, userID int) ([]entities.UserCredentials, error)
 	FindCredentialByUserID(ctx context.Context, ucID, userID int) (entities.UserCredentials, error)
 	Delete(ctx context.Context, ucID, userID int) error
 	Update(ctx context.Context, uc entities.UserCredentials) error
@@ -33,7 +33,7 @@ func (c credential) Create(ctx context.Context, uc models.UserCredentials) error
 
 func (c credential) Credentials(ctx context.Context) ([]models.UserCredentials, error) {
 	userID := ctx.Value(types.UserIDKey).(int)
-	ucs, err := c.repo.FindCredentialsByUserID(ctx, userID)
+	ucs, err := c.repo.FindAllByUserID(ctx, userID)
 	if err != nil {
 		return nil, fmt.Errorf("get credentials err: %v", err)
 	}

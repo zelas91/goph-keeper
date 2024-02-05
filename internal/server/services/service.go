@@ -9,6 +9,7 @@ type Service struct {
 	Auth       *auth
 	CreditCard *creditCard
 	Credential *credential
+	TextData   *textData
 }
 
 func New(options ...func(s *Service)) *Service {
@@ -34,5 +35,10 @@ func WithCardUseRepository(cr cardRepo) func(s *Service) {
 func WithCredentialUseRepository(cr credentialRepo) func(s *Service) {
 	return func(s *Service) {
 		s.Credential = &credential{repo: cr}
+	}
+}
+func WithTextUseRepository(tr textDataRepo) func(s *Service) {
+	return func(s *Service) {
+		s.TextData = &textData{repo: tr}
 	}
 }

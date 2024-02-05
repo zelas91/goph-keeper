@@ -68,3 +68,23 @@ func ToEntitiesUserCredential(uc models.UserCredentials) entities.UserCredential
 	}
 
 }
+
+func ToModelText(t entities.TextData) models.TextData {
+	return models.TextData{
+		ID:      t.ID,
+		UserId:  t.UserId,
+		Version: t.Version,
+		Text:    t.Text,
+	}
+
+}
+
+func ToEntitiesText(t models.TextData) entities.TextData {
+	return entities.TextData{
+		ID:      t.ID,
+		UserId:  t.UserId,
+		Version: t.Version,
+		Text:    t.Text,
+	}
+
+}

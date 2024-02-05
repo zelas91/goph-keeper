@@ -25,12 +25,14 @@ func main() {
 		services.WithAuthUseRepository(repo.Auth),
 		services.WithCardUseRepository(repo.CreditCard),
 		services.WithCredentialUseRepository(repo.Credential),
+		services.WithTextUseRepository(repo.TextData),
 	)
 
 	handlers := controllers.New(log,
 		controllers.WithAuthUseService(serv.Auth),
 		controllers.WithCardUseService(serv.CreditCard),
 		controllers.WithUserCredentialUseService(serv.Credential),
+		controllers.WithTextUseService(serv.TextData),
 	)
 
 	router := chi.NewRouter()
