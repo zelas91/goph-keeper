@@ -88,3 +88,23 @@ func ToEntitiesText(t models.TextData) entities.TextData {
 	}
 
 }
+
+func ToModelBinaryFile(b entities.BinaryFile) models.BinaryFile {
+	return models.BinaryFile{
+		ID:       b.ID,
+		UserId:   b.UserId,
+		FileName: b.FileName,
+		Path:     b.Path,
+	}
+
+}
+
+func ToEntitiesBinaryFile(b models.BinaryFile) entities.BinaryFile {
+	return entities.BinaryFile{
+		ID:       b.ID,
+		UserId:   b.UserId,
+		Path:     b.Path,
+		FileName: b.FileName,
+	}
+
+}

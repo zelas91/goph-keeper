@@ -5,7 +5,7 @@ import (
 	"net/http"
 )
 
-type errorMessage struct {
+type ErrorMessage struct {
 	Message    string `json:"message"`
 	StatusCode int    `json:"status_code"`
 }
@@ -13,7 +13,7 @@ type errorMessage struct {
 func NewErrorResponse(w http.ResponseWriter, message string, statusCode int) {
 	w.WriteHeader(statusCode)
 	w.Header().Set("Content-Type", "application/json")
-	if err := json.NewEncoder(w).Encode(errorMessage{Message: message, StatusCode: statusCode}); err != nil {
+	if err := json.NewEncoder(w).Encode(ErrorMessage{Message: message, StatusCode: statusCode}); err != nil {
 		return
 	}
 }

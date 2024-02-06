@@ -79,7 +79,7 @@ func (c *credential) create() http.HandlerFunc {
 			}
 		}()
 
-		credential, err := c.credentialFromRequestAndValid(r)
+		credential, err := c.fromRequestAndValid(r)
 		if err != nil {
 			c.log.Errorf("create: decode or validation err:%v", err)
 			payload.NewErrorResponse(w, err.Error(), http.StatusBadRequest)
@@ -114,13 +114,17 @@ func (c *credential) update() http.HandlerFunc {
 			return
 		}
 
-		uc, err := c.credentialFromRequestAndValid(r)
+		uc, err := c.fromRequestAndValid(r)
 		if err != nil {
 			c.log.Errorf("update: decode or validation err:%v", err)
 			payload.NewErrorResponse(w, err.Error(), http.StatusBadRequest)
 			return
 		}
-
+		if uc.Version == 0 {
+			c.log.Error("update: credential version == 0")
+			payload.NewErrorResponse(w, "update: credential version == 0", http.StatusBadRequest)
+			return
+		}
 		uc.ID = id
 
 		if err = c.service.Update(r.Context(), uc); err != nil {
@@ -146,7 +150,7 @@ func (c *credential) delete() http.HandlerFunc {
 	}
 }
 
-func (c *credential) credentialFromRequestAndValid(r *http.Request) (credential models.UserCredentials, err error) {
+func (c *credential) fromRequestAndValid(r *http.Request) (credential models.UserCredentials, err error) {
 	if err = json.NewDecoder(r.Body).Decode(&credential); err != nil {
 		return credential, fmt.Errorf("credential  json decode err:%v", err)
 	}

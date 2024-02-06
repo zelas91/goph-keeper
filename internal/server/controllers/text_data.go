@@ -121,6 +121,12 @@ func (t *textData) update() http.HandlerFunc {
 			return
 		}
 
+		if text.Version == 0 {
+			t.log.Error("update: text version == 0")
+			payload.NewErrorResponse(w, "update: text version == 0", http.StatusBadRequest)
+			return
+		}
+
 		text.ID = id
 
 		if err = t.service.Update(r.Context(), text); err != nil {

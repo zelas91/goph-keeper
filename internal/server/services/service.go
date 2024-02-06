@@ -2,6 +2,7 @@ package services
 
 import (
 	"github.com/patrickmn/go-cache"
+	"github.com/zelas91/goph-keeper/internal/logger"
 	"time"
 )
 
@@ -10,6 +11,7 @@ type Service struct {
 	CreditCard *creditCard
 	Credential *credential
 	TextData   *textData
+	BinaryFile *binaryFile
 }
 
 func New(options ...func(s *Service)) *Service {
@@ -40,5 +42,11 @@ func WithCredentialUseRepository(cr credentialRepo) func(s *Service) {
 func WithTextUseRepository(tr textDataRepo) func(s *Service) {
 	return func(s *Service) {
 		s.TextData = &textData{repo: tr}
+	}
+}
+
+func WithBinaryFileUseRepository(bf binaryFileRepo, log logger.Logger, basePathSaveFile string) func(s *Service) {
+	return func(s *Service) {
+		s.BinaryFile = &binaryFile{repo: bf, log: log, basePath: basePathSaveFile}
 	}
 }

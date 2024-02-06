@@ -15,6 +15,7 @@ type Controllers struct {
 	card       *сreditCard
 	credential *credential
 	textData   *textData
+	binary     *binaryFile
 	log        logger.Logger
 	valid      *validator.Validate
 }
@@ -53,6 +54,12 @@ func WithTextUseService(td textDataService) func(c *Controllers) {
 		c.textData = &textData{service: td, valid: c.valid, log: c.log}
 	}
 }
+
+func WithBinaryFileUseService(bs binaryFileService) func(c *Controllers) {
+	return func(c *Controllers) {
+		c.binary = &binaryFile{service: bs, valid: c.valid, log: c.log}
+	}
+}
 func (c *Controllers) CreateRoutes() http.Handler {
 	router := chi.NewRouter()
 	router.Use(middleware.ContentTypeJSON(c.log), middleware2.Recoverer)
@@ -64,6 +71,7 @@ func (c *Controllers) CreateRoutes() http.Handler {
 				r.Mount("/card", c.card.createRoutes())
 				r.Mount("/credential", c.credential.createRoutes())
 				r.Mount("/text", c.textData.createRoutes())
+				r.Mount("/file", c.binary.createRoutes())
 			})
 		})
 	})

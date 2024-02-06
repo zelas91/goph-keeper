@@ -26,6 +26,7 @@ func main() {
 		services.WithCardUseRepository(repo.CreditCard),
 		services.WithCredentialUseRepository(repo.Credential),
 		services.WithTextUseRepository(repo.TextData),
+		services.WithBinaryFileUseRepository(repo.BinaryFile, log, *cfg.BasePathSaveFile),
 	)
 
 	handlers := controllers.New(log,
@@ -33,6 +34,7 @@ func main() {
 		controllers.WithCardUseService(serv.CreditCard),
 		controllers.WithUserCredentialUseService(serv.Credential),
 		controllers.WithTextUseService(serv.TextData),
+		controllers.WithBinaryFileUseService(serv.BinaryFile),
 	)
 
 	router := chi.NewRouter()

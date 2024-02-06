@@ -79,7 +79,7 @@ func (c *сreditCard) create() http.HandlerFunc {
 			}
 		}()
 
-		card, err := c.cardFromRequestAndValid(r)
+		card, err := c.fromRequestAndValid(r)
 		if err != nil {
 			c.log.Errorf("create: decode or validation err:%v", err)
 			payload.NewErrorResponse(w, err.Error(), http.StatusBadRequest)
@@ -114,10 +114,15 @@ func (c *сreditCard) update() http.HandlerFunc {
 			return
 		}
 
-		card, err := c.cardFromRequestAndValid(r)
+		card, err := c.fromRequestAndValid(r)
 		if err != nil {
 			c.log.Errorf("update: decode or validation err:%v", err)
 			payload.NewErrorResponse(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+		if card.Version == 0 {
+			c.log.Error("update: card version == 0")
+			payload.NewErrorResponse(w, "update: card version == 0", http.StatusBadRequest)
 			return
 		}
 
@@ -146,7 +151,7 @@ func (c *сreditCard) delete() http.HandlerFunc {
 	}
 }
 
-func (c *сreditCard) cardFromRequestAndValid(r *http.Request) (card models.Card, err error) {
+func (c *сreditCard) fromRequestAndValid(r *http.Request) (card models.Card, err error) {
 	if err = json.NewDecoder(r.Body).Decode(&card); err != nil {
 		return card, fmt.Errorf("card  json decode err:%v", err)
 	}

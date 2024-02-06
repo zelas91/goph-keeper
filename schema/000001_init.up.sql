@@ -43,7 +43,6 @@ create table user_credentials
     update_at timestamp not null default now()
 );
 
-
 create trigger update_user_credentials_trigger
     before update on user_credentials
     for each row
@@ -59,8 +58,16 @@ create table text_data
     update_at timestamp not null default now()
 );
 
-
 create trigger update_text_data_trigger
     before update on text_data
     for each row
 execute function update_version();
+
+create table binary_file
+(
+    id  bigserial not null unique primary key ,
+    user_id int references users (id) not null ,
+    path varchar not null ,
+    created_at timestamp not null default now(),
+    file_name varchar not null
+);

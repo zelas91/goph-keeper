@@ -11,6 +11,7 @@ type Repository struct {
 	CreditCard *creditCard
 	Credential *credential
 	TextData   *textData
+	BinaryFile *binaryFile
 }
 
 func New(log logger.Logger, db *sqlx.DB) *Repository {
@@ -20,6 +21,7 @@ func New(log logger.Logger, db *sqlx.DB) *Repository {
 		CreditCard: &creditCard{tm: manager},
 		Credential: &credential{tm: manager},
 		TextData:   &textData{tm: manager},
+		BinaryFile: &binaryFile{tm: manager},
 	}
 }
 
