@@ -4,9 +4,11 @@ import (
 	"fmt"
 	"github.com/gorilla/websocket"
 	"github.com/zelas91/goph-keeper/internal/server/models"
+	"io"
 	"log"
 	"net/http"
 	"net/url"
+	"os"
 )
 
 var (
@@ -20,19 +22,29 @@ func main() {
 	//crypt, err := crypto.NewEncrypt(secretKey)
 	//fmt.Println(crypt, err)
 	//client.NewClient("localhost:8080").Start()
-	u := url.URL{Scheme: "ws", Host: "localhost:8080", Path: "/api/download"}
+	u := url.URL{Scheme: "ws", Host: "localhost:8080", Path: "/api/file/upload"}
 
 	header := http.Header{}
 	header.Add("Content-Type", "application/json")
-	header.Add("jwt", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MDcyMzE1MjgsIkxvZ2luIjoiemVsYXMifQ.ptUz9v03OdhkPkaQiXiG4vL_VDFrRb0wFyKyimE70mU")
+	header.Add("jwt", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MDczMTI5NTEsIkxvZ2luIjoicXdlcnR5dSJ9.vjiE6TyUBOdAAIXCPUKk9Qxm8wg4FWJV6fZWLFbA5sM")
 	conn, _, err := websocket.DefaultDialer.Dial(u.String(), header)
 	if err != nil {
 		log.Fatal("Не удалось подключиться к серверу:", err)
 	}
 	defer conn.Close()
 
+	file, err := os.Open("/home/zelas/java_error_in_goland_1124.log")
+	if err != nil {
+		log.Fatal("Не удалось открыть файл:", err)
+	}
+	fInfo, err := file.Stat()
+	if err != nil {
+		fmt.Println("info ", err)
+	}
+	fmt.Println(fInfo)
 	fileData := models.BinaryFile{
-		FileName: "goph-keeper-main.zip",
+		FileName: "java_error_in_goland_1124.log",
+		Size:     int(fInfo.Size()),
 	}
 
 	if err = conn.WriteJSON(fileData); err != nil {
@@ -47,43 +59,52 @@ func main() {
 	if !answer.Confirm {
 		return
 	}
-	for {
-		mt, b, err := conn.ReadMessage()
-		if err != nil {
-			fmt.Println("ERROR ", mt, err)
-			return
-		}
-		fmt.Println(mt, b)
-
-	}
-
-	//file, err := os.Open("C:/Users/zelas/Downloads/goph-keeper-main.zip")
+	//file, err := os.Create("/home/zelas/upload" + fileData.FileName)
 	//if err != nil {
-	//	log.Fatal("Не удалось открыть файл:", err)
-	//}
-	//defer file.Close()
-	//
-
-	//buffer := make([]byte, 1024)
-	//for {
-	//	n, err := file.Read(buffer)
-	//	if err != nil {
-	//		if err != io.EOF {
-	//			log.Fatal("Ошибка чтения файла:", err)
-	//		}
-	//		conn.WriteMessage(websocket.TextMessage, []byte("Binary data transfer completed"))
-	//		break // Достигнут конец файла
-	//	}
-	//	err = conn.WriteMessage(websocket.BinaryMessage, buffer[:n])
-	//	if err != nil {
-	//		log.Fatal("Ошибка отправки сообщения:", err)
-	//	}
-	//}
-	//_, _, err = conn.ReadMessage()
-	//if !websocket.IsCloseError(err, websocket.CloseNormalClosure) {
-	//	fmt.Println("Завершился с ошибкой", err)
+	//	fmt.Println(err)
 	//	return
 	//}
-	//fmt.Println("Файл успешно отправлен.")
+	//for {
+	//	mt, b, err := conn.ReadMessage()
+	//	if err != nil {
+	//		fmt.Println("ERROR ", mt, err)
+	//		return
+	//	}
+	//	if mt == websocket.BinaryMessage {
+	//		if _, err = file.Write(b); err != nil {
+	//			fmt.Println("error write file")
+	//			return
+	//
+	//		}
+	//	} else {
+	//		return
+	//	}
+	//
+	//}
+	//defer file.Close()
+
+	defer file.Close()
+
+	buffer := make([]byte, 1024)
+	for {
+		n, err := file.Read(buffer)
+		if err != nil {
+			if err != io.EOF {
+				log.Fatal("Ошибка чтения файла:", err)
+			}
+			conn.WriteMessage(websocket.TextMessage, []byte("Binary data transfer completed"))
+			break // Достигнут конец файла
+		}
+		err = conn.WriteMessage(websocket.BinaryMessage, buffer[:n])
+		if err != nil {
+			log.Fatal("Ошибка отправки сообщения:", err)
+		}
+	}
+	_, _, err = conn.ReadMessage()
+	if !websocket.IsCloseError(err, websocket.CloseNormalClosure) {
+		fmt.Println("Завершился с ошибкой", err)
+		return
+	}
+	fmt.Println("Файл успешно отправлен.")
 
 }

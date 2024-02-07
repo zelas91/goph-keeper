@@ -69,5 +69,6 @@ create table binary_file
     user_id int references users (id) not null ,
     path varchar not null ,
     created_at timestamp not null default now(),
-    file_name varchar not null
+    file_name varchar not null,
+    size int not null
 );

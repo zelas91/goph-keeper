@@ -11,8 +11,8 @@ type binaryFile struct {
 }
 
 func (b binaryFile) Create(ctx context.Context, bf entities.BinaryFile) error {
-	query := `insert into binary_file (path, file_name, user_id)
-		values (:path,:file_name,:user_id);`
+	query := `insert into binary_file (path, file_name, user_id, size)
+		values (:path,:file_name,:user_id, :size);`
 	if _, err := b.tm.getConn(ctx).NamedExecContext(ctx, query, bf); err != nil {
 		return fmt.Errorf("repo binary file create err: %v", err)
 	}

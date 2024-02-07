@@ -95,6 +95,7 @@ func ToModelBinaryFile(b entities.BinaryFile) models.BinaryFile {
 		UserId:   b.UserId,
 		FileName: b.FileName,
 		Path:     b.Path,
+		Size:     b.Size,
 	}
 
 }
@@ -105,6 +106,7 @@ func ToEntitiesBinaryFile(b models.BinaryFile) entities.BinaryFile {
 		UserId:   b.UserId,
 		Path:     b.Path,
 		FileName: b.FileName,
+		Size:     b.Size,
 	}
 
 }

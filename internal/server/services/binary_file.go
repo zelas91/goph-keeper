@@ -2,6 +2,7 @@ package services
 
 import (
 	"compress/gzip"
+	"errors"
 	"fmt"
 	"github.com/zelas91/goph-keeper/internal/logger"
 	"github.com/zelas91/goph-keeper/internal/server/helper"
@@ -62,7 +63,9 @@ func (b *binaryFile) Upload(ctx context.Context, bf models.BinaryFile, reader <-
 	gz := b.compress.Writer()
 	defer b.compress.Release(gz)
 	gz.Reset(file)
+	count := 0
 	for val := range reader {
+		count = count + len(val)
 		_, err = gz.Write(val)
 		if err != nil {
 			return fmt.Errorf("save err %v", err)
@@ -71,6 +74,11 @@ func (b *binaryFile) Upload(ctx context.Context, bf models.BinaryFile, reader <-
 	if err = gz.Flush(); err != nil {
 		return fmt.Errorf("gzip flush err %v", err)
 	}
+
+	if bf.Size != count {
+		return errors.New("file does not match length")
+	}
+
 	if err := b.repo.Create(ctx, helper.ToEntitiesBinaryFile(bf)); err != nil {
 		return err
 	}

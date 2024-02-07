@@ -56,7 +56,7 @@ func (b *binaryFile) upload() http.HandlerFunc {
 		var bf models.BinaryFile
 
 		if err = conn.ReadJSON(&bf); err != nil {
-			b.log.Errorf("Failed to unmarshal JSON:", err)
+			b.log.Errorf("Failed to unmarshal JSON: %v", err)
 			if err := conn.WriteMessage(websocket.CloseMessage,
 				websocket.FormatCloseMessage(websocket.CloseUnsupportedData,
 					fmt.Sprintf("upload: write message error err:%v", err))); err != nil {

@@ -5,6 +5,7 @@ type BinaryFile struct {
 	UserId   int    `json:"-"`
 	Path     string `json:"-"`
 	FileName string `json:"file_name" validate:"required"`
+	Size     int    `json:"size" validate:"required"`
 }
 
 type AnswerBinaryFile struct {
