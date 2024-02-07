@@ -3,6 +3,7 @@ package services
 import (
 	"github.com/patrickmn/go-cache"
 	"github.com/zelas91/goph-keeper/internal/logger"
+	compress2 "github.com/zelas91/goph-keeper/internal/utils/compress"
 	"time"
 )
 
@@ -47,6 +48,12 @@ func WithTextUseRepository(tr textDataRepo) func(s *Service) {
 
 func WithBinaryFileUseRepository(bf binaryFileRepo, log logger.Logger, basePathSaveFile string) func(s *Service) {
 	return func(s *Service) {
-		s.BinaryFile = &binaryFile{repo: bf, log: log, basePath: basePathSaveFile}
+		s.BinaryFile = &binaryFile{
+			repo:       bf,
+			log:        log,
+			basePath:   basePathSaveFile,
+			compress:   compress2.NewCompress(log),
+			decompress: compress2.NewDecompress(),
+		}
 	}
 }

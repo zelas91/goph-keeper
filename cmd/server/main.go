@@ -10,6 +10,7 @@ import (
 )
 
 func main() {
+
 	cfg := NewConfig()
 	log := logger.New(*cfg.CfgLogger)
 	log.Info("start ", cfg.SecretKey)

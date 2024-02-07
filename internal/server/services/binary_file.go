@@ -1,6 +1,7 @@
 package services
 
 import (
+	"compress/gzip"
 	"fmt"
 	"github.com/zelas91/goph-keeper/internal/logger"
 	"github.com/zelas91/goph-keeper/internal/server/helper"
@@ -14,9 +15,21 @@ import (
 )
 
 type binaryFile struct {
-	log      logger.Logger
-	repo     binaryFileRepo
-	basePath string
+	log        logger.Logger
+	repo       binaryFileRepo
+	basePath   string
+	compress   compress
+	decompress decompress
+}
+
+type compress interface {
+	Writer() *gzip.Writer
+	Release(writer *gzip.Writer)
+}
+
+type decompress interface {
+	Release(reader *gzip.Reader)
+	Reader() *gzip.Reader
 }
 
 //go:generate mockgen -package mocks -destination=./mocks/mock_binary_file_repo.go -source=binary_file.go -package=mock
@@ -27,7 +40,7 @@ type binaryFileRepo interface {
 	Delete(ctx context.Context, userID, fileID int) error
 }
 
-func (b binaryFile) Upload(ctx context.Context, bf models.BinaryFile, reader <-chan []byte) error {
+func (b *binaryFile) Upload(ctx context.Context, bf models.BinaryFile, reader <-chan []byte) error {
 	userID := ctx.Value(types.UserIDKey).(int)
 	path := fmt.Sprintf("%s/%d/%s", b.basePath, userID, bf.FileName)
 	bf.Path = path
@@ -46,11 +59,17 @@ func (b binaryFile) Upload(ctx context.Context, bf models.BinaryFile, reader <-c
 			b.log.Errorf("close file err:%v", err)
 		}
 	}()
+	gz := b.compress.Writer()
+	defer b.compress.Release(gz)
+	gz.Reset(file)
 	for val := range reader {
-		_, err = file.Write(val)
+		_, err = gz.Write(val)
 		if err != nil {
 			return fmt.Errorf("save err %v", err)
 		}
+	}
+	if err = gz.Flush(); err != nil {
+		return fmt.Errorf("gzip flush err %v", err)
 	}
 	if err := b.repo.Create(ctx, helper.ToEntitiesBinaryFile(bf)); err != nil {
 		return err
@@ -58,7 +77,7 @@ func (b binaryFile) Upload(ctx context.Context, bf models.BinaryFile, reader <-c
 	return nil
 }
 
-func (b binaryFile) Download(ctx context.Context, bf models.BinaryFile, write chan<- []byte) error {
+func (b *binaryFile) Download(ctx context.Context, bf models.BinaryFile, write chan<- []byte) error {
 	userID := ctx.Value(types.UserIDKey).(int)
 	ef, err := b.repo.FindFileByUserID(ctx, bf.ID, userID)
 	if err != nil {
@@ -73,9 +92,15 @@ func (b binaryFile) Download(ctx context.Context, bf models.BinaryFile, write ch
 			b.log.Error("download: close file err: %v", err)
 		}
 	}()
-	buffer := make([]byte, 1024)
+
+	gz := b.decompress.Reader()
+	defer b.decompress.Release(gz)
+	if err = gz.Reset(file); err != nil {
+		return fmt.Errorf("gzip reader reset err: %v", err)
+	}
 	for {
-		n, err := file.Read(buffer)
+		buffer := make([]byte, 1024)
+		n, err := gz.Read(buffer)
 		if err != nil {
 			if err != io.EOF {
 				b.log.Error("failed read file err: %v", err)
@@ -88,7 +113,7 @@ func (b binaryFile) Download(ctx context.Context, bf models.BinaryFile, write ch
 	return nil
 }
 
-func (b binaryFile) Files(ctx context.Context) ([]models.BinaryFile, error) {
+func (b *binaryFile) Files(ctx context.Context) ([]models.BinaryFile, error) {
 	userID := ctx.Value(types.UserIDKey).(int)
 	ef, err := b.repo.FindAllByUserID(ctx, userID)
 	if err != nil {
@@ -100,7 +125,7 @@ func (b binaryFile) Files(ctx context.Context) ([]models.BinaryFile, error) {
 	}
 	return files, nil
 }
-func (b binaryFile) Delete(ctx context.Context, fileID int) error {
+func (b *binaryFile) Delete(ctx context.Context, fileID int) error {
 	userID := ctx.Value(types.UserIDKey).(int)
 	file, err := b.repo.FindFileByUserID(ctx, fileID, userID)
 	if err != nil {
