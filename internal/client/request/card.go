@@ -127,6 +127,10 @@ func (c *Card) Cards(args []string) error {
 	if err != nil {
 		return err
 	}
-	fmt.Print(string(resp.Body()))
+	str, err := prettyJSON(resp.Body())
+	if err != nil {
+		return err
+	}
+	fmt.Println(str)
 	return nil
 }

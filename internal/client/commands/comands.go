@@ -49,8 +49,7 @@ func (c *CommandManager) RegisterCommand(
 func (c *CommandManager) ExecCommandWithName(name string, args []string) error {
 	cmd, ok := c.commands[name]
 	if !ok {
-		fmt.Println("invalid command, 'help'")
-		return nil
+		return errors.New("invalid command, 'help'")
 	}
 
 	err := cmd.Exec(args)
@@ -89,7 +88,9 @@ func (c *CommandManager) help(args []string) error {
 		fmt.Fprintln(w, "===========================================================")
 	}
 	fmt.Fprintln(w, "-----------------------------------------------------------")
-	w.Flush()
+	if err := w.Flush(); err != nil {
+		return fmt.Errorf("table format err :%v", err)
+	}
 	return nil
 }
 
