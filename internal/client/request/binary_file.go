@@ -20,7 +20,7 @@ func NewBinaryFile(request *Request) *BinaryFile {
 	return &BinaryFile{request: request}
 }
 
-func (b *BinaryFile) DeleteFile(args []string) error {
+func (b *BinaryFile) Delete(args []string) error {
 	if len(args) < 1 {
 		return error2.ErrInvalidCommand
 	}
@@ -100,7 +100,6 @@ func (b *BinaryFile) Upload(args []string) error {
 	if !websocket.IsCloseError(err, websocket.CloseNormalClosure) {
 		return fmt.Errorf("transfer completed with err: %v", err)
 	}
-	fmt.Println("success")
 	return nil
 }
 
@@ -167,11 +166,10 @@ func (b *BinaryFile) Download(args []string) error {
 			}
 		}
 	}
-	fmt.Println("success")
 	return nil
 }
 
-func (b *BinaryFile) GetAll(args []string) error {
+func (b *BinaryFile) Files(args []string) error {
 	resp, err := b.request.R().Get("/file")
 	if err != nil {
 		return err

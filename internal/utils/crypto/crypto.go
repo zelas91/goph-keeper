@@ -38,7 +38,6 @@ func (c *Crypto) Encrypt(data []byte) ([]byte, error) {
 func (c *Crypto) Decrypt(data []byte) ([]byte, error) {
 	nonceSize := c.gcm.NonceSize()
 	nonce, encryptedData := data[:nonceSize], data[nonceSize:]
-	fmt.Println(" ht ", string(nonce), string(encryptedData), len(nonce), len(encryptedData), nonceSize)
 	result, err := c.gcm.Open(nil, nonce, encryptedData, nil)
 	if err != nil {
 		return nil, err

@@ -24,6 +24,7 @@ type Client struct {
 	httpClient *resty.Client
 	auth       *request.Authorization
 	binary     *request.BinaryFile
+	card       *request.Card
 }
 
 func NewClient(addr string) *Client {
@@ -63,18 +64,23 @@ func (c *Client) Start() {
 			}
 			if err != nil {
 				fmt.Println("command err ", err)
+				continue
 			}
-
+			fmt.Println("success")
 		}
 	}()
 	<-c.work
 }
 func (c *Client) init() {
 	r := request.NewRequest(c.httpClient, c.session)
+
 	c.auth = request.NewAuthorization(r)
 	c.binary = request.NewBinaryFile(r)
+	c.card = request.NewCard(r)
+
 	c.registerCommandBinaryFile()
 	c.registerCommandAuth()
+	c.registerCommandCard()
 }
 
 func (c *Client) registerCommandAuth() {
@@ -87,17 +93,32 @@ func (c *Client) registerCommandAuth() {
 
 func (c *Client) registerCommandBinaryFile() {
 	tag := "Binary File"
-	c.cm.RegisterCommand("delete_file", "delete file from server",
-		c.binary.DeleteFile, "delete_file: <id>", tag)
-	c.cm.RegisterCommand("get_files", "get data about files  on the server",
-		c.binary.GetAll, "", tag)
+	c.cm.RegisterCommand("file_delete", "delete file from server",
+		c.binary.Delete, "file_delete: <id>", tag)
+	c.cm.RegisterCommand("files", "get data about files  on the server",
+		c.binary.Files, "", tag)
 
-	c.cm.RegisterCommand("download_file", "download file from server",
-		c.binary.Download, "download_file: <id> <path>", tag)
+	c.cm.RegisterCommand("file_download", "download file from server",
+		c.binary.Download, "file_download: <id> <path>", tag)
 
-	c.cm.RegisterCommand("upload_file", "upload file in server",
-		c.binary.Upload, "upload_file: <name> <path>", tag)
+	c.cm.RegisterCommand("file_upload", "upload file in server",
+		c.binary.Upload, "file_upload: <name> <path>", tag)
 }
+
+func (c *Client) registerCommandCard() {
+	tag := "credit card"
+	c.cm.RegisterCommand("card_delete", "delete card from server",
+		c.card.Delete, "card_delete: <id>", tag)
+	c.cm.RegisterCommand("cards", "get data about cards  on the server",
+		c.card.Cards, "", tag)
+
+	c.cm.RegisterCommand("card_create", "create card to server",
+		c.card.Create, "card_create: <number> <expired> <cvv>", tag)
+
+	c.cm.RegisterCommand("card_update", "update card to server",
+		c.card.Update, "card_update: <id> and any fields in the format <number:1234> <expired:12/27> <cvv:567>", tag)
+}
+
 func commandParsing(in *bufio.Reader) ([]string, error) {
 	choice, err := in.ReadString('\n')
 	if err != nil {

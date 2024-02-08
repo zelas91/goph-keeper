@@ -13,8 +13,7 @@ func main() {
 
 	cfg := NewConfig()
 	log := logger.New(*cfg.CfgLogger)
-	log.Info("start ", cfg.SecretKey)
-
+	log.Info("start ")
 	db, err := repository.NewPostgresDB(*cfg.DBurl)
 	if err != nil {
 		log.Fatalf("db init err : %v", err)

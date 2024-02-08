@@ -11,7 +11,7 @@ var (
 	dbURL            *string
 	cfgLogger        *string
 	basePathSaveFile *string
-	secretKey        = ""
+	secretKey        *string
 	buildCommit      = "N/A"
 	buildDate        = "N/A"
 )
@@ -21,6 +21,7 @@ func init() {
 	dbURL = flag.String("d", "host=localhost port=5432 user=keeper dbname=goph-keeper password=12345678 sslmode=disable", "url DB")
 	cfgLogger = flag.String("l", "cfg/config.json", "config file logger")
 	basePathSaveFile = flag.String("s", "save_file", "dir save file")
+	secretKey = flag.String("ek", "", "encrypt secret key")
 }
 
 type Config struct {
@@ -28,9 +29,7 @@ type Config struct {
 	DBurl            *string `env:"DATABASE_URI"`
 	CfgLogger        *string `env:"CONFIG_LOGGER"`
 	BasePathSaveFile *string `env:"BASE_PATH_SAVE"`
-	Version          string
-	BuildData        string
-	SecretKey        string
+	SecretKey        *string `env:"ENCRYPT_SECRET_KEY"`
 }
 
 func NewConfig() *Config {
@@ -53,10 +52,9 @@ func NewConfig() *Config {
 	if cfg.BasePathSaveFile == nil {
 		cfg.BasePathSaveFile = basePathSaveFile
 	}
-
-	cfg.BuildData = buildDate
-	cfg.SecretKey = secretKey
-	cfg.Version = buildCommit
+	if cfg.SecretKey == nil {
+		cfg.SecretKey = secretKey
+	}
 
 	flag.Parse()
 	return &cfg
