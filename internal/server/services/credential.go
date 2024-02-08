@@ -17,7 +17,7 @@ type credential struct {
 type credentialRepo interface {
 	Create(ctx context.Context, uc entities.UserCredentials) error
 	FindAllByUserID(ctx context.Context, userID int) ([]entities.UserCredentials, error)
-	FindCredentialByUserID(ctx context.Context, ucID, userID int) (entities.UserCredentials, error)
+	FindByIDAndUserID(ctx context.Context, ucID, userID int) (entities.UserCredentials, error)
 	Delete(ctx context.Context, ucID, userID int) error
 	Update(ctx context.Context, uc entities.UserCredentials) error
 }
@@ -46,7 +46,7 @@ func (c credential) Credentials(ctx context.Context) ([]models.UserCredentials, 
 
 func (c credential) Credential(ctx context.Context, ucID int) (models.UserCredentials, error) {
 	userID := ctx.Value(types.UserIDKey).(int)
-	uc, err := c.repo.FindCredentialByUserID(ctx, ucID, userID)
+	uc, err := c.repo.FindByIDAndUserID(ctx, ucID, userID)
 	if err != nil {
 		return models.UserCredentials{}, fmt.Errorf("get Credentials err: %v", err)
 	}

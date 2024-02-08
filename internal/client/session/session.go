@@ -1,21 +1,16 @@
 package session
 
 import (
-	"fmt"
 	"net/http"
 )
 
-const (
-	baseURL = "http://"
-)
-
 type Session struct {
-	Jwt *http.Cookie
-	Url string
+	Jwt  *http.Cookie
+	Host string
 }
 
-func NewSession(url string) *Session {
-	return &Session{Url: fmt.Sprintf("%s%s", baseURL, url)}
+func NewSession(addr string) *Session {
+	return &Session{Host: addr}
 }
 
 func (s *Session) IsAuth() bool {
@@ -23,4 +18,14 @@ func (s *Session) IsAuth() bool {
 		return s.Jwt.Value != ""
 	}
 	return false
+}
+
+func (s *Session) CleanToken() {
+	s.Jwt = nil
+}
+func (s *Session) GetJwt() *http.Cookie {
+	if s.Jwt == nil {
+		return &http.Cookie{}
+	}
+	return s.Jwt
 }

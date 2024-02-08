@@ -36,7 +36,7 @@ type decompress interface {
 //go:generate mockgen -package mocks -destination=./mocks/mock_binary_file_repo.go -source=binary_file.go -package=mock
 type binaryFileRepo interface {
 	Create(ctx context.Context, bf entities.BinaryFile) error
-	FindFileByUserID(ctx context.Context, fileID, userID int) (entities.BinaryFile, error)
+	FindByIDAndUserID(ctx context.Context, fileID, userID int) (entities.BinaryFile, error)
 	FindAllByUserID(ctx context.Context, userID int) ([]entities.BinaryFile, error)
 	Delete(ctx context.Context, userID, fileID int) error
 }
@@ -86,8 +86,9 @@ func (b *binaryFile) Upload(ctx context.Context, bf models.BinaryFile, reader <-
 }
 
 func (b *binaryFile) Download(ctx context.Context, bf models.BinaryFile, write chan<- []byte) error {
+	defer close(write)
 	userID := ctx.Value(types.UserIDKey).(int)
-	ef, err := b.repo.FindFileByUserID(ctx, bf.ID, userID)
+	ef, err := b.repo.FindByIDAndUserID(ctx, bf.ID, userID)
 	if err != nil {
 		return err
 	}
@@ -133,9 +134,18 @@ func (b *binaryFile) Files(ctx context.Context) ([]models.BinaryFile, error) {
 	}
 	return files, nil
 }
+
+func (b *binaryFile) File(ctx context.Context, fileID int) (models.BinaryFile, error) {
+	userID := ctx.Value(types.UserIDKey).(int)
+	file, err := b.repo.FindByIDAndUserID(ctx, fileID, userID)
+	if err != nil {
+		return models.BinaryFile{}, fmt.Errorf("get file err: %v", err)
+	}
+	return helper.ToModelBinaryFile(file), nil
+}
 func (b *binaryFile) Delete(ctx context.Context, fileID int) error {
 	userID := ctx.Value(types.UserIDKey).(int)
-	file, err := b.repo.FindFileByUserID(ctx, fileID, userID)
+	file, err := b.repo.FindByIDAndUserID(ctx, fileID, userID)
 	if err != nil {
 		return err
 	}

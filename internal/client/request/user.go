@@ -2,21 +2,18 @@ package request
 
 import (
 	"fmt"
-	"github.com/go-resty/resty/v2"
 	error2 "github.com/zelas91/goph-keeper/internal/client/error"
-	"github.com/zelas91/goph-keeper/internal/client/session"
 	"github.com/zelas91/goph-keeper/internal/server/models"
 	"net/http"
 	"strings"
 )
 
 type Authorization struct {
-	httpClient *resty.Client
-	session    *session.Session
+	request *Request
 }
 
-func NewAuthorization(httpClient *resty.Client, session *session.Session) *Authorization {
-	return &Authorization{httpClient: httpClient, session: session}
+func NewAuthorization(request *Request) *Authorization {
+	return &Authorization{request: request}
 }
 
 func (a *Authorization) SignIn(args []string) error {
@@ -24,7 +21,8 @@ func (a *Authorization) SignIn(args []string) error {
 	if err != nil {
 		return err
 	}
-	resp, err := a.httpClient.R().SetBody(user).Post(fmt.Sprintf("%s/api/signin", a.session.Url))
+
+	resp, err := a.request.R().SetBody(user).Post("/signin")
 	if err != nil {
 		return err
 	}
@@ -33,7 +31,7 @@ func (a *Authorization) SignIn(args []string) error {
 	}
 	for _, cookie := range resp.Cookies() {
 		if strings.EqualFold(cookie.Name, "jwt") {
-			a.session.Jwt = cookie
+			a.request.SetCookiesAuthorization(cookie)
 			break
 		}
 	}
@@ -44,7 +42,7 @@ func (a *Authorization) SignUp(args []string) error {
 	if err != nil {
 		return err
 	}
-	resp, err := a.httpClient.R().SetBody(user).Post(fmt.Sprintf("%s/api/signup", a.session.Url))
+	resp, err := a.request.R().SetBody(user).Post("/signup")
 	if err != nil {
 		return err
 	}
@@ -53,7 +51,7 @@ func (a *Authorization) SignUp(args []string) error {
 	}
 	for _, cookie := range resp.Cookies() {
 		if strings.EqualFold(cookie.Name, "jwt") {
-			a.session.Jwt = cookie
+			a.request.SetCookiesAuthorization(cookie)
 			break
 		}
 	}

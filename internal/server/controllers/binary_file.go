@@ -36,6 +36,7 @@ type binaryFileService interface {
 	Download(ctx context.Context, bf models.BinaryFile, write chan<- []byte) error
 	Delete(ctx context.Context, fileID int) error
 	Files(ctx context.Context) ([]models.BinaryFile, error)
+	File(ctx context.Context, fileID int) (models.BinaryFile, error)
 }
 
 func (b *binaryFile) upload() http.HandlerFunc {
@@ -90,6 +91,7 @@ func (b *binaryFile) upload() http.HandlerFunc {
 			}()
 			for {
 				if ctx.Err() != nil {
+					b.log.Errorf("download context err: %v", ctx.Err())
 					return
 				}
 				select {
@@ -98,7 +100,7 @@ func (b *binaryFile) upload() http.HandlerFunc {
 				default:
 					mt, msg, err := conn.ReadMessage()
 					if err != nil {
-						b.log.Errorf("Failed to read message: %v", err)
+						b.log.Errorf("failed to read message: %v", err)
 						return
 					}
 					if mt == websocket.BinaryMessage {
@@ -174,29 +176,18 @@ func (b *binaryFile) download() http.HandlerFunc {
 			return
 		}
 		writer := make(chan []byte)
-
 		g, ctx := errgroup.WithContext(r.Context())
 		g.Go(func() error {
 			return b.service.Download(ctx, bf, writer)
 		})
-		go func() {
-			defer close(writer)
-			for body := range writer {
-				if ctx.Err() != nil {
-					b.log.Errorf("download context err: %v", err)
-					return
-				}
-				select {
-				case <-ctx.Done():
-					return
-				default:
-					if err := conn.WriteMessage(websocket.BinaryMessage, body); err != nil {
-						b.log.Errorf("download write binary websocket err: %v", err)
-						return
-					}
-				}
+		for body := range writer {
+
+			if err := conn.WriteMessage(websocket.BinaryMessage, body); err != nil {
+				b.log.Errorf("download write binary websocket err: %v", err)
+				return
 			}
-		}()
+		}
+
 		if err = g.Wait(); err != nil {
 			b.log.Errorf("download service err: %v", err)
 
@@ -252,6 +243,29 @@ func (b *binaryFile) Files() http.HandlerFunc {
 	}
 }
 
+func (b *binaryFile) File() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		id, err := helper.IDFromContext(r.Context())
+		if err != nil {
+			b.log.Errorf("file: get id from request err: %v", err)
+			payload.NewErrorResponse(w, "file: get id from request err", http.StatusBadRequest)
+			return
+		}
+		file, err := b.service.File(r.Context(), id)
+		if err != nil {
+			b.log.Errorf("file: get file err: %v", err)
+			payload.NewErrorResponse(w, "file: get file err", http.StatusNotFound)
+			return
+		}
+
+		if err = json.NewEncoder(w).Encode(file); err != nil {
+			b.log.Errorf("file: encode err %v", err)
+			payload.NewErrorResponse(w, "file: encode err", http.StatusInternalServerError)
+			return
+		}
+	}
+}
+
 func (b *binaryFile) createRoutes() http.Handler {
 	router := chi.NewRouter()
 	router.Route("/", func(r chi.Router) {
@@ -259,6 +273,7 @@ func (b *binaryFile) createRoutes() http.Handler {
 		r.Get("/upload", b.upload())
 		r.Get("/download", b.download())
 		r.Get("/", b.Files())
+		r.Get("/{id}", b.File())
 	})
 	return router
 

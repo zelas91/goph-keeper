@@ -29,7 +29,7 @@ func (c credential) FindAllByUserID(ctx context.Context, userID int) ([]entities
 	return ucs, nil
 }
 
-func (c credential) FindCredentialByUserID(ctx context.Context, ucID, userID int) (entities.UserCredentials, error) {
+func (c credential) FindByIDAndUserID(ctx context.Context, ucID, userID int) (entities.UserCredentials, error) {
 	query := `select * from user_credentials where id=$1 and user_id=$2`
 	var uc entities.UserCredentials
 	if err := c.tm.getConn(ctx).GetContext(ctx, &uc, query, ucID, userID); err != nil {

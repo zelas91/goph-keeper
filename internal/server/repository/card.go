@@ -29,7 +29,7 @@ func (c creditCard) FindAllByUserID(ctx context.Context, userID int) ([]entities
 	return cards, nil
 }
 
-func (c creditCard) FindCardByUserID(ctx context.Context, cardID, userID int) (entities.Card, error) {
+func (c creditCard) FindByIDAndUserID(ctx context.Context, cardID, userID int) (entities.Card, error) {
 	query := `select * from cards where id=$1 and user_id=$2`
 	var card entities.Card
 	if err := c.tm.getConn(ctx).GetContext(ctx, &card, query, cardID, userID); err != nil {

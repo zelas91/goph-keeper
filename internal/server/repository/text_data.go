@@ -29,7 +29,7 @@ func (t textData) FindAllByUserID(ctx context.Context, userID int) ([]entities.T
 	return texts, nil
 }
 
-func (t textData) FindTextByUserID(ctx context.Context, textID, userID int) (entities.TextData, error) {
+func (t textData) FindByIDAndUserID(ctx context.Context, textID, userID int) (entities.TextData, error) {
 	query := `select * from text_data where id=$1 and user_id=$2`
 	var text entities.TextData
 	if err := t.tm.getConn(ctx).GetContext(ctx, &text, query, textID, userID); err != nil {

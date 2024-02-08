@@ -17,7 +17,7 @@ type creditCard struct {
 type cardRepo interface {
 	Create(ctx context.Context, card entities.Card) error
 	FindAllByUserID(ctx context.Context, userID int) ([]entities.Card, error)
-	FindCardByUserID(ctx context.Context, cardID, userID int) (entities.Card, error)
+	FindByIDAndUserID(ctx context.Context, cardID, userID int) (entities.Card, error)
 	Delete(ctx context.Context, cardID, userID int) error
 	Update(ctx context.Context, card entities.Card) error
 }
@@ -46,7 +46,7 @@ func (c creditCard) Cards(ctx context.Context) ([]models.Card, error) {
 
 func (c creditCard) Card(ctx context.Context, cardID int) (models.Card, error) {
 	userID := ctx.Value(types.UserIDKey).(int)
-	card, err := c.repo.FindCardByUserID(ctx, cardID, userID)
+	card, err := c.repo.FindByIDAndUserID(ctx, cardID, userID)
 	if err != nil {
 		return models.Card{}, fmt.Errorf("get card err: %v", err)
 	}

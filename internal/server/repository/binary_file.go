@@ -19,7 +19,7 @@ func (b binaryFile) Create(ctx context.Context, bf entities.BinaryFile) error {
 	return nil
 }
 
-func (b binaryFile) FindFileByUserID(ctx context.Context, fileID, userID int) (entities.BinaryFile, error) {
+func (b binaryFile) FindByIDAndUserID(ctx context.Context, fileID, userID int) (entities.BinaryFile, error) {
 	query := `select * from binary_file where id=$1 and user_id=$2`
 	var bf entities.BinaryFile
 	if err := b.tm.getConn(ctx).GetContext(ctx, &bf, query, fileID, userID); err != nil {

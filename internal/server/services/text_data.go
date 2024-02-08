@@ -17,7 +17,7 @@ type textData struct {
 type textDataRepo interface {
 	Create(ctx context.Context, text entities.TextData) error
 	FindAllByUserID(ctx context.Context, textID int) ([]entities.TextData, error)
-	FindTextByUserID(ctx context.Context, textID, userID int) (entities.TextData, error)
+	FindByIDAndUserID(ctx context.Context, textID, userID int) (entities.TextData, error)
 	Delete(ctx context.Context, textID, userID int) error
 	Update(ctx context.Context, uc entities.TextData) error
 }
@@ -46,7 +46,7 @@ func (t textData) Texts(ctx context.Context) ([]models.TextData, error) {
 
 func (t textData) Text(ctx context.Context, ucID int) (models.TextData, error) {
 	userID := ctx.Value(types.UserIDKey).(int)
-	text, err := t.repo.FindTextByUserID(ctx, ucID, userID)
+	text, err := t.repo.FindByIDAndUserID(ctx, ucID, userID)
 	if err != nil {
 		return models.TextData{}, fmt.Errorf("get text err: %v", err)
 	}
