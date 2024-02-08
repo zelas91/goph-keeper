@@ -11,6 +11,7 @@ type ErrorMessage struct {
 }
 
 func NewErrorResponse(w http.ResponseWriter, message string, statusCode int) {
+
 	w.WriteHeader(statusCode)
 	w.Header().Set("Content-Type", "application/json")
 	if err := json.NewEncoder(w).Encode(ErrorMessage{Message: message, StatusCode: statusCode}); err != nil {
