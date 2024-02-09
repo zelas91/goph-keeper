@@ -2,7 +2,7 @@ ARCH = amd64 arm64 arm 386
 PLATFORMS = linux darwin windows
 NAME_SERVER = server
 NAME_CLIENT = goph-keeper-client
-
+FLAGS_BUILD =  "-X main.buildCommit=$$(git rev-parse --short HEAD) -X main.buildDate=$$(date +'%Y-%m-%d_%H:%M')"
 .SILENT:
 .PHONY:
 encrypt:
@@ -21,9 +21,10 @@ server-build:encrypt
      -X main.buildDate=$$(date +'%Y-%m-%d_%H:%M')"\
      cmd/server/*.go
 client-build:
-	go build -o build/client/$(NAME_CLIENT)-$(GOOS)-$(GOARCH) \
-	-ldflags "-X main.buildCommit=$$(git rev-parse --short HEAD)\
-    -X main.buildDate=$$(date +'%Y-%m-%d_%H:%M')" cmd/client/*.go
+	go build -o build/client/$(NAME_CLIENT)-$(GOOS)-$(GOARCH) -ldflags $(FLAGS_BUILD) cmd/client/*.go
+ifeq ($(GOOS), windows)
+	mv build/client/$(NAME_CLIENT)-$(GOOS)-$(GOARCH) build/client/$(NAME_CLIENT)-$(GOOS)-$(GOARCH).exe
+endif
 
 run-docker:
 	make server-build
