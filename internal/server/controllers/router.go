@@ -1,7 +1,10 @@
 package controllers
 
 import (
+	"fmt"
+	"github.com/zelas91/goph-keeper/internal/server/payload"
 	"net/http"
+	"os"
 
 	"github.com/go-chi/chi/v5"
 	middleware2 "github.com/go-chi/chi/v5/middleware"
@@ -10,6 +13,8 @@ import (
 	"github.com/zelas91/goph-keeper/internal/server/middleware"
 	"github.com/zelas91/goph-keeper/internal/utils/validation"
 )
+
+var clientAppDir = "build/client"
 
 type Controllers struct {
 	auth       *auth
@@ -61,8 +66,47 @@ func WithBinaryFileUseService(bs binaryFileService) func(c *Controllers) {
 		c.binary = &binaryFile{service: bs, valid: c.valid, log: c.log}
 	}
 }
+func listFilesHandler(w http.ResponseWriter, r *http.Request) {
+	files, err := os.ReadDir(clientAppDir)
+	if err != nil {
+		payload.NewErrorResponse(w, "Failed to list files", http.StatusInternalServerError)
+		return
+	}
+
+	var fileList []string
+	for _, file := range files {
+		if file.IsDir() {
+			continue
+		}
+		fileList = append(fileList, file.Name())
+	}
+
+	html := "<h1>Files client:</h1><ul>"
+	for _, file := range fileList {
+		html += "<li><a href='/files/client/" + file + "'>" + file + "</a></li>"
+	}
+	html += "</ul>"
+	if _, err := w.Write([]byte(html)); err != nil {
+		payload.NewErrorResponse(w, "", http.StatusInternalServerError)
+		return
+	}
+}
+
+func downloadFileHandler(w http.ResponseWriter, r *http.Request) {
+	fileName := chi.URLParam(r, "fileName")
+	path := fmt.Sprintf("%s/%s", clientAppDir, fileName)
+	_, err := os.Stat(path)
+	if err != nil {
+		payload.NewErrorResponse(w, "File not found", http.StatusNotFound)
+		return
+	}
+	http.ServeFile(w, r, path)
+}
+
 func (c *Controllers) CreateRoutes() http.Handler {
 	router := chi.NewRouter()
+	router.Get("/files/client", listFilesHandler)
+	router.Get("/files/client/{fileName}", downloadFileHandler)
 	router.Route("/api", func(r chi.Router) {
 		r.Use(middleware.ContentTypeJSON(c.log), middleware2.Recoverer)
 		r.Mount("/", c.auth.createRoutes())

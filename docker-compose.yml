@@ -20,11 +20,14 @@ services:
       - .:/app
     command: |
       sh -c "/wait
-      migrate -path ./schema -database 'postgres://keeper:12345678@postgres:5432/goph-keeper?sslmode=disable' up"
-#      ./build/server/server"
+      migrate -path ./schema -database 'postgres://keeper:12345678@postgres:5432/goph-keeper?sslmode=disable' up
+      ./build/server/server"
     ports:
       - "8080:8080"
+    expose:
+      - 8080
     depends_on:
       - postgres
     environment:
       WAIT_HOSTS: postgres:5432
+      DATABASE_URI: host=psql-keeper port=5432 user=keeper dbname=goph-keeper password=12345678 sslmode=disable

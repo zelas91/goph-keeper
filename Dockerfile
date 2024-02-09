@@ -10,3 +10,4 @@ RUN curl -s https://packagecloud.io/install/repositories/golang-migrate/migrate/
 RUN apt-get update
 RUN apt-get install migrate
 RUN chmod +x /wait
+EXPOSE 8080

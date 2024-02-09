@@ -18,8 +18,7 @@ clean:
 server-build:encrypt
 	go build -o build/server/$(NAME_SERVER) \
  -ldflags "-X main.buildCommit=$$(git rev-parse --short HEAD)\
-     -X main.buildDate=$$(date +'%Y-%m-%d_%H:%M')\
-     -X main.secretKey=$(shell cat secretKey.txt)"\
+     -X main.buildDate=$$(date +'%Y-%m-%d_%H:%M')"\
      cmd/server/*.go
 client-build:
 	go build -o build/client/$(NAME_CLIENT)-$(GOOS)-$(GOARCH) \
