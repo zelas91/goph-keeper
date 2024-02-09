@@ -1,13 +1,13 @@
 package controllers
 
 import (
+	"bytes"
 	"database/sql"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
-	"strings"
 	"testing"
 
 	"github.com/golang/mock/gomock"
@@ -177,7 +177,7 @@ func TestSignUp(t *testing.T) {
 			body, err := json.Marshal(test.user)
 			assert.NoError(t, err, "Body write error")
 
-			request := httptest.NewRequest(test.method, test.url, strings.NewReader(string(body)))
+			request := httptest.NewRequest(test.method, test.url, bytes.NewReader(body))
 			w := httptest.NewRecorder()
 
 			h := handler.CreateRoutes()
@@ -271,7 +271,7 @@ func TestSignIn(t *testing.T) {
 			body, err := json.Marshal(test.user)
 			assert.NoError(t, err, "Body write error")
 
-			request := httptest.NewRequest(test.method, test.url, strings.NewReader(string(body)))
+			request := httptest.NewRequest(test.method, test.url, bytes.NewReader(body))
 			w := httptest.NewRecorder()
 			request.Header.Set("Content-Type", test.content)
 			h := handler.CreateRoutes()
@@ -356,7 +356,7 @@ func TestSignInService(t *testing.T) {
 			body, err := json.Marshal(test.user)
 			assert.NoError(t, err, "Body write error")
 
-			request := httptest.NewRequest(test.method, test.url, strings.NewReader(string(body)))
+			request := httptest.NewRequest(test.method, test.url, bytes.NewReader(body))
 			w := httptest.NewRecorder()
 			request.Header.Set("Content-Type", test.content)
 			h := handler.CreateRoutes()
@@ -467,7 +467,7 @@ func TestSignUpService(t *testing.T) {
 			body, err := json.Marshal(test.user)
 			assert.NoError(t, err, "Body write error")
 
-			request := httptest.NewRequest(test.method, test.url, strings.NewReader(string(body)))
+			request := httptest.NewRequest(test.method, test.url, bytes.NewReader(body))
 			w := httptest.NewRecorder()
 			request.Header.Set("Content-Type", test.content)
 			h := handler.CreateRoutes()

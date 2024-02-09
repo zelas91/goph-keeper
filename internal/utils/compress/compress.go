@@ -8,12 +8,12 @@ import (
 )
 
 type Compress struct {
-	compress *sync.Pool
+	compress sync.Pool
 	log      logger.Logger
 }
 
 func NewCompress(log logger.Logger) *Compress {
-	return &Compress{compress: &sync.Pool{New: func() any {
+	return &Compress{compress: sync.Pool{New: func() any {
 		writer, err := gzip.NewWriterLevel(nil, gzip.BestCompression)
 		if err != nil {
 			return gzip.NewWriter(nil)
@@ -47,11 +47,11 @@ func (c *Compress) Release(writer *gzip.Writer) {
 }
 
 type Decompress struct {
-	decompress *sync.Pool
+	decompress sync.Pool
 }
 
 func NewDecompress() *Decompress {
-	return &Decompress{decompress: &sync.Pool{}}
+	return &Decompress{decompress: sync.Pool{}}
 }
 
 func (d *Decompress) Reader() *gzip.Reader {
