@@ -1,12 +1,13 @@
 package main
 
 import (
+	"net/http"
+
 	"github.com/go-chi/chi/v5"
 	"github.com/zelas91/goph-keeper/internal/logger"
 	"github.com/zelas91/goph-keeper/internal/server/controllers"
 	"github.com/zelas91/goph-keeper/internal/server/repository"
 	"github.com/zelas91/goph-keeper/internal/server/services"
-	"net/http"
 )
 
 func main() {

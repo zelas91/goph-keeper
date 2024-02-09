@@ -4,12 +4,13 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/gorilla/websocket"
-	error2 "github.com/zelas91/goph-keeper/internal/client/error"
-	"github.com/zelas91/goph-keeper/internal/server/models"
 	"io"
 	"net/http"
 	"os"
+
+	"github.com/gorilla/websocket"
+	error2 "github.com/zelas91/goph-keeper/internal/client/error"
+	"github.com/zelas91/goph-keeper/internal/server/models"
 )
 
 type BinaryFile struct {
@@ -79,6 +80,7 @@ func (b *BinaryFile) Upload(args []string) error {
 		return errors.New("server did not confirm the download of file")
 	}
 	buffer := make([]byte, 1024)
+	counter := 0
 	for {
 		n, err := file.Read(buffer)
 		if err != nil {
@@ -95,7 +97,10 @@ func (b *BinaryFile) Upload(args []string) error {
 		if err != nil {
 			return fmt.Errorf("websocket send msg err: %v", err)
 		}
+		counter = counter + len(buffer[:n])
+		fmt.Printf("\rupload: %dKB file size = %dKB", counter/1024, bf.Size/1024)
 	}
+	fmt.Println("")
 	_, _, err = conn.ReadMessage()
 	if !websocket.IsCloseError(err, websocket.CloseNormalClosure) {
 		return fmt.Errorf("transfer completed with err: %v", err)
@@ -151,6 +156,7 @@ func (b *BinaryFile) Download(args []string) error {
 			fmt.Printf("file close err: %v\n", err)
 		}
 	}()
+	counter := 0
 	for {
 		mt, msg, err := conn.ReadMessage()
 		if err != nil {
@@ -165,7 +171,10 @@ func (b *BinaryFile) Download(args []string) error {
 				return fmt.Errorf("write file err: %v", err)
 			}
 		}
+		counter = counter + len(msg)
+		fmt.Printf("\rdownload: %dKB file size = %dKB", counter/1024, bf.Size/1024)
 	}
+	fmt.Print("\n")
 	return nil
 }
 

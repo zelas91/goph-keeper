@@ -2,10 +2,11 @@ package logger
 
 import (
 	"encoding/json"
-	"go.uber.org/zap"
 	"log"
 	"os"
 	"sync"
+
+	"go.uber.org/zap"
 )
 
 var (

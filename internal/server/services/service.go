@@ -1,10 +1,11 @@
 package services
 
 import (
+	"time"
+
 	"github.com/patrickmn/go-cache"
 	"github.com/zelas91/goph-keeper/internal/logger"
 	compress2 "github.com/zelas91/goph-keeper/internal/utils/compress"
-	"time"
 )
 
 type Service struct {

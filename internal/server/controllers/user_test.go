@@ -5,6 +5,11 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"net/http"
+	"net/http/httptest"
+	"strings"
+	"testing"
+
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 	"github.com/zelas91/goph-keeper/internal/logger"
@@ -13,12 +18,8 @@ import (
 	"github.com/zelas91/goph-keeper/internal/server/repository"
 	"github.com/zelas91/goph-keeper/internal/server/repository/entities"
 	"github.com/zelas91/goph-keeper/internal/server/services"
-	"github.com/zelas91/goph-keeper/internal/server/services/mocks"
+	mock "github.com/zelas91/goph-keeper/internal/server/services/mocks"
 	"golang.org/x/crypto/bcrypt"
-	"net/http"
-	"net/http/httptest"
-	"strings"
-	"testing"
 )
 
 type mockBehaviorCreate func(s *mock.MockuserRepo, user entities.User)

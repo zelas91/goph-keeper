@@ -1,13 +1,14 @@
 package controllers
 
 import (
+	"net/http"
+
 	"github.com/go-chi/chi/v5"
 	middleware2 "github.com/go-chi/chi/v5/middleware"
 	"github.com/go-playground/validator/v10"
 	"github.com/zelas91/goph-keeper/internal/logger"
 	"github.com/zelas91/goph-keeper/internal/server/middleware"
 	"github.com/zelas91/goph-keeper/internal/utils/validation"
-	"net/http"
 )
 
 type Controllers struct {
@@ -62,8 +63,8 @@ func WithBinaryFileUseService(bs binaryFileService) func(c *Controllers) {
 }
 func (c *Controllers) CreateRoutes() http.Handler {
 	router := chi.NewRouter()
-	router.Use(middleware.ContentTypeJSON(c.log), middleware2.Recoverer)
 	router.Route("/api", func(r chi.Router) {
+		r.Use(middleware.ContentTypeJSON(c.log), middleware2.Recoverer)
 		r.Mount("/", c.auth.createRoutes())
 		r.Group(func(r chi.Router) {
 			r.Use(middleware.AuthorizationHandler(c.log, c.auth.service))

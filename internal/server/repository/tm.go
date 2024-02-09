@@ -3,6 +3,7 @@ package repository
 import (
 	"database/sql"
 	"errors"
+
 	"github.com/jmoiron/sqlx"
 	"github.com/zelas91/goph-keeper/internal/logger"
 	"golang.org/x/net/context"

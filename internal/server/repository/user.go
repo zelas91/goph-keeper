@@ -2,6 +2,7 @@ package repository
 
 import (
 	"errors"
+
 	"github.com/lib/pq"
 	"github.com/zelas91/goph-keeper/internal/server/repository/entities"
 	"golang.org/x/net/context"

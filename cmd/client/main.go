@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+
 	"github.com/zelas91/goph-keeper/internal/client"
 )
 

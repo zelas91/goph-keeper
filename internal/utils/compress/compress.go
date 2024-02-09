@@ -2,8 +2,9 @@ package compress
 
 import (
 	"compress/gzip"
-	"github.com/zelas91/goph-keeper/internal/logger"
 	"sync"
+
+	"github.com/zelas91/goph-keeper/internal/logger"
 )
 
 type Compress struct {

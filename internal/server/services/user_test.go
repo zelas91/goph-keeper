@@ -4,6 +4,8 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"testing"
+
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
@@ -13,7 +15,6 @@ import (
 	mock "github.com/zelas91/goph-keeper/internal/server/services/mocks"
 	"golang.org/x/crypto/bcrypt"
 	"golang.org/x/net/context"
-	"testing"
 )
 
 type mockBehaviorCreate func(s *mock.MockuserRepo, user entities.User)

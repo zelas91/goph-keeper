@@ -3,9 +3,10 @@ package helper
 import (
 	"errors"
 	"fmt"
+	"strconv"
+
 	"github.com/go-chi/chi/v5"
 	"golang.org/x/net/context"
-	"strconv"
 )
 
 func IDFromContext(ctx context.Context) (id int, err error) {

@@ -3,6 +3,8 @@ package services
 import (
 	"errors"
 	"fmt"
+	"time"
+
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/patrickmn/go-cache"
 	"github.com/zelas91/goph-keeper/internal/server/helper"
@@ -10,7 +12,6 @@ import (
 	"github.com/zelas91/goph-keeper/internal/server/repository/entities"
 	"golang.org/x/crypto/bcrypt"
 	"golang.org/x/net/context"
-	"time"
 )
 
 var secret = []byte("secret_key")

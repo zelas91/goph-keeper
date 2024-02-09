@@ -2,12 +2,13 @@ package request
 
 import (
 	"fmt"
+	"net/http"
+	"net/url"
+
 	"github.com/go-resty/resty/v2"
 	"github.com/gorilla/websocket"
 	error2 "github.com/zelas91/goph-keeper/internal/client/error"
 	"github.com/zelas91/goph-keeper/internal/client/session"
-	"net/http"
-	"net/url"
 )
 
 type Request struct {

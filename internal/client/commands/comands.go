@@ -3,9 +3,10 @@ package commands
 import (
 	"errors"
 	"fmt"
-	error2 "github.com/zelas91/goph-keeper/internal/client/error"
 	"os"
 	"text/tabwriter"
+
+	error2 "github.com/zelas91/goph-keeper/internal/client/error"
 )
 
 type command struct {

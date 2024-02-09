@@ -3,11 +3,12 @@ package request
 import (
 	"encoding/json"
 	"fmt"
-	error2 "github.com/zelas91/goph-keeper/internal/client/error"
-	"github.com/zelas91/goph-keeper/internal/server/models"
 	"net/http"
 	"strconv"
 	"strings"
+
+	error2 "github.com/zelas91/goph-keeper/internal/client/error"
+	"github.com/zelas91/goph-keeper/internal/server/models"
 )
 
 type Card struct {
@@ -59,7 +60,6 @@ func (c *Card) Update(args []string) error {
 		}
 	}
 	url := fmt.Sprintf("/card/%d", cardID)
-	fmt.Println(url, c.request.httClient.BaseURL)
 	resp, err := c.request.R().Get(url)
 	if err != nil {
 		return err
@@ -81,7 +81,7 @@ func (c *Card) Update(args []string) error {
 	}
 
 	if resp.StatusCode() != http.StatusOK {
-		return fmt.Errorf("request get card id error status code = %d, body = %s",
+		return fmt.Errorf("request update card error status code = %d, body = %s",
 			resp.StatusCode(), string(resp.Body()))
 	}
 	return nil
@@ -116,7 +116,7 @@ func (c *Card) Create(args []string) error {
 	}
 
 	if resp.StatusCode() != http.StatusCreated {
-		return fmt.Errorf("request create card id error status code = %d, body = %s",
+		return fmt.Errorf("request create card error status code = %d, body = %s",
 			resp.StatusCode(), string(resp.Body()))
 	}
 	return nil

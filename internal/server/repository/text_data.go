@@ -3,6 +3,7 @@ package repository
 import (
 	"errors"
 	"fmt"
+
 	"github.com/zelas91/goph-keeper/internal/server/repository/entities"
 	"golang.org/x/net/context"
 )
@@ -13,7 +14,7 @@ type textData struct {
 
 func (t textData) Create(ctx context.Context, uc entities.TextData) error {
 	query := `insert into text_data (large_text,user_id)
-		values (large_text=:large_text,user_id=:user_id);`
+		values (:large_text,:user_id);`
 	if _, err := t.tm.getConn(ctx).NamedExecContext(ctx, query, uc); err != nil {
 		return fmt.Errorf("repo text create err: %v", err)
 	}

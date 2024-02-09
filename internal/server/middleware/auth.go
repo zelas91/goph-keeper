@@ -1,11 +1,12 @@
 package middleware
 
 import (
+	"net/http"
+
 	"github.com/zelas91/goph-keeper/internal/logger"
 	"github.com/zelas91/goph-keeper/internal/server/payload"
 	"github.com/zelas91/goph-keeper/internal/server/types"
 	"golang.org/x/net/context"
-	"net/http"
 )
 
 type tokenParser interface {

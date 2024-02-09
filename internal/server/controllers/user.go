@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"net/http"
+
 	"github.com/go-chi/chi/v5"
 	"github.com/go-playground/validator/v10"
 	"github.com/zelas91/goph-keeper/internal/logger"
@@ -11,7 +13,6 @@ import (
 	"github.com/zelas91/goph-keeper/internal/server/payload"
 	"github.com/zelas91/goph-keeper/internal/server/repository"
 	"golang.org/x/net/context"
-	"net/http"
 )
 
 type auth struct {

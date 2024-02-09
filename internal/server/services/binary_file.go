@@ -4,15 +4,16 @@ import (
 	"compress/gzip"
 	"errors"
 	"fmt"
+	"io"
+	"os"
+	"path/filepath"
+
 	"github.com/zelas91/goph-keeper/internal/logger"
 	"github.com/zelas91/goph-keeper/internal/server/helper"
 	"github.com/zelas91/goph-keeper/internal/server/models"
 	"github.com/zelas91/goph-keeper/internal/server/repository/entities"
 	"github.com/zelas91/goph-keeper/internal/server/types"
 	"golang.org/x/net/context"
-	"io"
-	"os"
-	"path/filepath"
 )
 
 type binaryFile struct {
@@ -107,13 +108,13 @@ func (b *binaryFile) Download(ctx context.Context, bf models.BinaryFile, write c
 	if err = gz.Reset(file); err != nil {
 		return fmt.Errorf("gzip reader reset err: %v", err)
 	}
+
 	for {
 		buffer := make([]byte, 1024)
 		n, err := gz.Read(buffer)
 		if err != nil {
 			if err != io.EOF {
-				b.log.Error("failed read file err: %v", err)
-				return err
+				return fmt.Errorf("failed read file err: %v", err)
 			}
 			break
 		}

@@ -1,9 +1,10 @@
 package validation
 
 import (
+	"regexp"
+
 	"github.com/go-playground/validator/v10"
 	"github.com/zelas91/goph-keeper/internal/logger"
-	"regexp"
 )
 
 func NewValidator(log logger.Logger) *validator.Validate {

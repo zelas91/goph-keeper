@@ -2,10 +2,11 @@ package request
 
 import (
 	"fmt"
-	error2 "github.com/zelas91/goph-keeper/internal/client/error"
-	"github.com/zelas91/goph-keeper/internal/server/models"
 	"net/http"
 	"strings"
+
+	error2 "github.com/zelas91/goph-keeper/internal/client/error"
+	"github.com/zelas91/goph-keeper/internal/server/models"
 )
 
 type Authorization struct {

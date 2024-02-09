@@ -4,16 +4,17 @@ import (
 	"bufio"
 	"errors"
 	"fmt"
-	"github.com/go-resty/resty/v2"
-	"github.com/zelas91/goph-keeper/internal/client/commands"
-	error2 "github.com/zelas91/goph-keeper/internal/client/error"
-	"github.com/zelas91/goph-keeper/internal/client/request"
-	"github.com/zelas91/goph-keeper/internal/client/session"
 	"os"
 	"os/signal"
 	"strings"
 	"syscall"
 	"time"
+
+	"github.com/go-resty/resty/v2"
+	"github.com/zelas91/goph-keeper/internal/client/commands"
+	error2 "github.com/zelas91/goph-keeper/internal/client/error"
+	"github.com/zelas91/goph-keeper/internal/client/request"
+	"github.com/zelas91/goph-keeper/internal/client/session"
 )
 
 type Client struct {
@@ -25,6 +26,8 @@ type Client struct {
 	auth       *request.Authorization
 	binary     *request.BinaryFile
 	card       *request.Card
+	text       *request.TextData
+	credential *request.Credential
 }
 
 func NewClient(addr string) *Client {
@@ -48,12 +51,9 @@ func (c *Client) Start() {
 			if !c.session.IsAuth() {
 				fmt.Print("(no authorization)")
 			}
-			fmt.Println(">")
+			fmt.Print(">")
 			args, err := commandParsing(c.in)
 			if err != nil {
-				if errors.Is(err, error2.ErrAuthorization) {
-					c.session.CleanToken()
-				}
 				fmt.Println(err)
 				continue
 			}
@@ -63,6 +63,9 @@ func (c *Client) Start() {
 				break
 			}
 			if err != nil {
+				if errors.Is(err, error2.ErrAuthorization) {
+					c.session.CleanToken()
+				}
 				fmt.Println("command err ", err)
 				continue
 			}
@@ -77,10 +80,14 @@ func (c *Client) init() {
 	c.auth = request.NewAuthorization(r)
 	c.binary = request.NewBinaryFile(r)
 	c.card = request.NewCard(r)
+	c.text = request.NewTextData(r)
+	c.credential = request.NewCredential(r)
 
-	c.registerCommandBinaryFile()
 	c.registerCommandAuth()
+	c.registerCommandBinaryFile()
 	c.registerCommandCard()
+	c.registerCommandText()
+	c.registerCommandCredential()
 }
 
 func (c *Client) registerCommandAuth() {
@@ -117,6 +124,34 @@ func (c *Client) registerCommandCard() {
 
 	c.cm.RegisterCommand("card_update", "update card to server",
 		c.card.Update, "card_update: <id> and any fields in the format <number:1234> <expired:12/27> <cvv:567>", tag)
+}
+
+func (c *Client) registerCommandText() {
+	tag := "Text"
+	c.cm.RegisterCommand("text_delete", "delete text from server",
+		c.text.Delete, "text_delete: <id>", tag)
+	c.cm.RegisterCommand("texts", "get data about texts  on the server",
+		c.text.Texts, "", tag)
+
+	c.cm.RegisterCommand("text_create", "create text to server",
+		c.text.Create, "text_create: <'text'>", tag)
+
+	c.cm.RegisterCommand("text_update", "update text to server",
+		c.text.Update, "text_update: <id> <'text'>", tag)
+}
+
+func (c *Client) registerCommandCredential() {
+	tag := "User credential"
+	c.cm.RegisterCommand("credential_delete", "delete credential from server",
+		c.credential.Delete, "credential_delete: <id>", tag)
+	c.cm.RegisterCommand("credentials", "get data about credentials  on the server",
+		c.credential.Credentials, "", tag)
+
+	c.cm.RegisterCommand("credential_create", "create credential to server",
+		c.credential.Create, "credential_create: <login> <password>", tag)
+
+	c.cm.RegisterCommand("credential_update", "update credential to server",
+		c.credential.Update, "credential_update: <id> and any fields in the format <login:password>  <password:password>", tag)
 }
 
 func commandParsing(in *bufio.Reader) ([]string, error) {

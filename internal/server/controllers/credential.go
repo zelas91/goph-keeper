@@ -3,6 +3,8 @@ package controllers
 import (
 	"encoding/json"
 	"fmt"
+	"net/http"
+
 	"github.com/go-chi/chi/v5"
 	"github.com/go-playground/validator/v10"
 	"github.com/zelas91/goph-keeper/internal/logger"
@@ -10,7 +12,6 @@ import (
 	"github.com/zelas91/goph-keeper/internal/server/models"
 	"github.com/zelas91/goph-keeper/internal/server/payload"
 	"golang.org/x/net/context"
-	"net/http"
 )
 
 type credential struct {
