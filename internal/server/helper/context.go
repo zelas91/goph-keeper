@@ -16,7 +16,7 @@ func IDFromContext(ctx context.Context) (id int, err error) {
 	}
 	id, err = strconv.Atoi(idStr)
 	if err != nil {
-		return id, fmt.Errorf("convert id=%s, to int err: %v", idStr, err)
+		return id, fmt.Errorf("convert id=%s, to int err: %w", idStr, err)
 	}
 	if id == 0 {
 		return id, errors.New("id incorrect")

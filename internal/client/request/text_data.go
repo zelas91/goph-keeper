@@ -25,7 +25,7 @@ func (t *TextData) Delete(args []string) error {
 	url := fmt.Sprintf("/text/%s", args[0])
 	resp, err := t.request.R().Delete(url)
 	if err != nil {
-		return fmt.Errorf("request text delete err: %v", err)
+		return fmt.Errorf("request text delete err: %w", err)
 	}
 	if resp.StatusCode() != http.StatusOK {
 		return fmt.Errorf("request text delete error status code = %d", resp.StatusCode())
@@ -39,14 +39,14 @@ func (t *TextData) Update(args []string) error {
 	}
 	textID, err := strconv.Atoi(args[0])
 	if err != nil {
-		return fmt.Errorf("text id err:%v", err)
+		return fmt.Errorf("text id err:%w", err)
 	}
 
 	url := fmt.Sprintf("/text/%d", textID)
 
 	resp, err := t.request.R().Get(url)
 	if err != nil {
-		return fmt.Errorf("request get text err: %v", err)
+		return fmt.Errorf("request get text err: %w", err)
 	}
 
 	if resp.StatusCode() != http.StatusOK {
@@ -55,7 +55,7 @@ func (t *TextData) Update(args []string) error {
 	}
 	var text models.TextData
 	if err := json.Unmarshal(resp.Body(), &text); err != nil {
-		return fmt.Errorf("request text decode err: %v", err)
+		return fmt.Errorf("request text decode err: %w", err)
 	}
 	var tb strings.Builder
 	for i := 1; i < len(args); i++ {

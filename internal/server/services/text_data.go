@@ -27,7 +27,7 @@ func (t textData) Create(ctx context.Context, text models.TextData) error {
 	userID := ctx.Value(types.UserIDKey).(int)
 	text.UserId = userID
 	if err := t.repo.Create(ctx, helper.ToEntitiesText(text)); err != nil {
-		return fmt.Errorf("create text err: %v", err)
+		return fmt.Errorf("create text err: %w", err)
 	}
 	return nil
 }
@@ -36,7 +36,7 @@ func (t textData) Texts(ctx context.Context) ([]models.TextData, error) {
 	userID := ctx.Value(types.UserIDKey).(int)
 	texts, err := t.repo.FindAllByUserID(ctx, userID)
 	if err != nil {
-		return nil, fmt.Errorf("get texts err: %v", err)
+		return nil, fmt.Errorf("get texts err: %w", err)
 	}
 	textsModel := make([]models.TextData, len(texts))
 	for i, v := range texts {
@@ -49,7 +49,7 @@ func (t textData) Text(ctx context.Context, ucID int) (models.TextData, error) {
 	userID := ctx.Value(types.UserIDKey).(int)
 	text, err := t.repo.FindByIDAndUserID(ctx, ucID, userID)
 	if err != nil {
-		return models.TextData{}, fmt.Errorf("get text err: %v", err)
+		return models.TextData{}, fmt.Errorf("get text err: %w", err)
 	}
 	return helper.ToModelText(text), nil
 }
@@ -58,7 +58,7 @@ func (t textData) Delete(ctx context.Context, ucID int) error {
 	userID := ctx.Value(types.UserIDKey).(int)
 
 	if err := t.repo.Delete(ctx, ucID, userID); err != nil {
-		return fmt.Errorf("delete text err: %v", err)
+		return fmt.Errorf("delete text err: %w", err)
 	}
 	return nil
 }
@@ -67,7 +67,7 @@ func (t textData) Update(ctx context.Context, text models.TextData) error {
 	userID := ctx.Value(types.UserIDKey).(int)
 	text.UserId = userID
 	if err := t.repo.Update(ctx, helper.ToEntitiesText(text)); err != nil {
-		return fmt.Errorf("update credentials err:%v", err)
+		return fmt.Errorf("update credentials err:%w", err)
 	}
 	return nil
 }

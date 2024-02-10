@@ -27,7 +27,7 @@ func (c creditCard) Create(ctx context.Context, card models.Card) error {
 	userID := ctx.Value(types.UserIDKey).(int)
 	card.UserId = userID
 	if err := c.repo.Create(ctx, helper.ToEntitiesCard(card)); err != nil {
-		return fmt.Errorf("create card err: %v", err)
+		return fmt.Errorf("create card err: %w", err)
 	}
 	return nil
 }
@@ -36,7 +36,7 @@ func (c creditCard) Cards(ctx context.Context) ([]models.Card, error) {
 	userID := ctx.Value(types.UserIDKey).(int)
 	cards, err := c.repo.FindAllByUserID(ctx, userID)
 	if err != nil {
-		return nil, fmt.Errorf("get cards err: %v", err)
+		return nil, fmt.Errorf("get cards err: %w", err)
 	}
 	cardsModel := make([]models.Card, len(cards))
 	for i, v := range cards {
@@ -49,7 +49,7 @@ func (c creditCard) Card(ctx context.Context, cardID int) (models.Card, error) {
 	userID := ctx.Value(types.UserIDKey).(int)
 	card, err := c.repo.FindByIDAndUserID(ctx, cardID, userID)
 	if err != nil {
-		return models.Card{}, fmt.Errorf("get card err: %v", err)
+		return models.Card{}, fmt.Errorf("get card err: %w", err)
 	}
 	return helper.ToModelCard(card), nil
 }
@@ -58,7 +58,7 @@ func (c creditCard) Delete(ctx context.Context, cardID int) error {
 	userID := ctx.Value(types.UserIDKey).(int)
 
 	if err := c.repo.Delete(ctx, cardID, userID); err != nil {
-		return fmt.Errorf("delete card err: %v", err)
+		return fmt.Errorf("delete card err: %w", err)
 	}
 	return nil
 }
@@ -68,7 +68,7 @@ func (c creditCard) Update(ctx context.Context, card models.Card) error {
 	card.UserId = userID
 
 	if err := c.repo.Update(ctx, helper.ToEntitiesCard(card)); err != nil {
-		return fmt.Errorf("update card err:%v", err)
+		return fmt.Errorf("update card err:%w", err)
 	}
 	return nil
 }

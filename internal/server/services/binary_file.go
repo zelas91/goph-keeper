@@ -54,7 +54,7 @@ func (b *binaryFile) Upload(ctx context.Context, bf models.BinaryFile, reader <-
 
 	file, err := os.Create(path)
 	if err != nil {
-		return fmt.Errorf("failed to create file:%v", err)
+		return fmt.Errorf("failed to create file:%w", err)
 	}
 	defer func() {
 		if err := file.Close(); err != nil {
@@ -69,11 +69,11 @@ func (b *binaryFile) Upload(ctx context.Context, bf models.BinaryFile, reader <-
 		count = count + len(val)
 		_, err = gz.Write(val)
 		if err != nil {
-			return fmt.Errorf("save err %v", err)
+			return fmt.Errorf("save err %w", err)
 		}
 	}
 	if err = gz.Flush(); err != nil {
-		return fmt.Errorf("gzip flush err %v", err)
+		return fmt.Errorf("gzip flush err %w", err)
 	}
 
 	if bf.Size != count {
@@ -106,7 +106,7 @@ func (b *binaryFile) Download(ctx context.Context, bf models.BinaryFile, write c
 	gz := b.decompress.Reader()
 	defer b.decompress.Release(gz)
 	if err = gz.Reset(file); err != nil {
-		return fmt.Errorf("gzip reader reset err: %v", err)
+		return fmt.Errorf("gzip reader reset err: %w", err)
 	}
 
 	for {
@@ -114,7 +114,7 @@ func (b *binaryFile) Download(ctx context.Context, bf models.BinaryFile, write c
 		n, err := gz.Read(buffer)
 		if err != nil {
 			if err != io.EOF {
-				return fmt.Errorf("failed read file err: %v", err)
+				return fmt.Errorf("failed read file err: %w", err)
 			}
 			break
 		}
@@ -140,7 +140,7 @@ func (b *binaryFile) File(ctx context.Context, fileID int) (models.BinaryFile, e
 	userID := ctx.Value(types.UserIDKey).(int)
 	file, err := b.repo.FindByIDAndUserID(ctx, fileID, userID)
 	if err != nil {
-		return models.BinaryFile{}, fmt.Errorf("get file err: %v", err)
+		return models.BinaryFile{}, fmt.Errorf("get file err: %w", err)
 	}
 	return helper.ToModelBinaryFile(file), nil
 }

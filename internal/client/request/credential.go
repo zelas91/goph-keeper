@@ -25,7 +25,7 @@ func (c *Credential) Delete(args []string) error {
 	url := fmt.Sprintf("/credential/%s", args[0])
 	resp, err := c.request.R().Delete(url)
 	if err != nil {
-		return fmt.Errorf("request credential delete err: %v", err)
+		return fmt.Errorf("request credential delete err: %w", err)
 	}
 	if resp.StatusCode() != http.StatusOK {
 		return fmt.Errorf("request credential delete error status code = %d", resp.StatusCode())
@@ -39,7 +39,7 @@ func (c *Credential) Update(args []string) error {
 	}
 	credentialID, err := strconv.Atoi(args[0])
 	if err != nil {
-		return fmt.Errorf("credential id err:%v", err)
+		return fmt.Errorf("credential id err:%w", err)
 	}
 
 	var credential models.UserCredentials
@@ -64,12 +64,12 @@ func (c *Credential) Update(args []string) error {
 	}
 
 	if resp.StatusCode() != http.StatusOK {
-		return fmt.Errorf("request get credential id error status code = %d, body=%v",
+		return fmt.Errorf("request get credential id error status code = %d, body=%s",
 			resp.StatusCode(), string(resp.Body()))
 	}
 
 	if err := json.Unmarshal(resp.Body(), &credential); err != nil {
-		return fmt.Errorf("request credential decode err: %v", err)
+		return fmt.Errorf("request credential decode err: %w", err)
 	}
 
 	credential = updateModelCredential(credential, login, password)

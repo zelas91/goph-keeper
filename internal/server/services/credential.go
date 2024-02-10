@@ -27,7 +27,7 @@ func (c credential) Create(ctx context.Context, uc models.UserCredentials) error
 	userID := ctx.Value(types.UserIDKey).(int)
 	uc.UserId = userID
 	if err := c.repo.Create(ctx, helper.ToEntitiesUserCredential(uc)); err != nil {
-		return fmt.Errorf("create credential err: %v", err)
+		return fmt.Errorf("create credential err: %w", err)
 	}
 	return nil
 }
@@ -36,7 +36,7 @@ func (c credential) Credentials(ctx context.Context) ([]models.UserCredentials, 
 	userID := ctx.Value(types.UserIDKey).(int)
 	ucs, err := c.repo.FindAllByUserID(ctx, userID)
 	if err != nil {
-		return nil, fmt.Errorf("get credentials err: %v", err)
+		return nil, fmt.Errorf("get credentials err: %w", err)
 	}
 	ucsModel := make([]models.UserCredentials, len(ucs))
 	for i, v := range ucs {
@@ -49,7 +49,7 @@ func (c credential) Credential(ctx context.Context, ucID int) (models.UserCreden
 	userID := ctx.Value(types.UserIDKey).(int)
 	uc, err := c.repo.FindByIDAndUserID(ctx, ucID, userID)
 	if err != nil {
-		return models.UserCredentials{}, fmt.Errorf("get Credentials err: %v", err)
+		return models.UserCredentials{}, fmt.Errorf("get Credentials err: %w", err)
 	}
 	return helper.ToModelUserCredential(uc), nil
 }
@@ -58,7 +58,7 @@ func (c credential) Delete(ctx context.Context, ucID int) error {
 	userID := ctx.Value(types.UserIDKey).(int)
 
 	if err := c.repo.Delete(ctx, ucID, userID); err != nil {
-		return fmt.Errorf("delete credential err: %v", err)
+		return fmt.Errorf("delete credential err: %w", err)
 	}
 	return nil
 }
@@ -67,7 +67,7 @@ func (c credential) Update(ctx context.Context, uc models.UserCredentials) error
 	userID := ctx.Value(types.UserIDKey).(int)
 	uc.UserId = userID
 	if err := c.repo.Update(ctx, helper.ToEntitiesUserCredential(uc)); err != nil {
-		return fmt.Errorf("update credentials err:%v", err)
+		return fmt.Errorf("update credentials err:%w", err)
 	}
 	return nil
 }

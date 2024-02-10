@@ -30,7 +30,7 @@ func (c *Crypto) Encrypt(data []byte) ([]byte, error) {
 	nonce := make([]byte, c.gcm.NonceSize())
 	_, err := rand.Read(nonce)
 	if err != nil {
-		return nil, fmt.Errorf("encrypt a one-time key err %v", err)
+		return nil, fmt.Errorf("encrypt a one-time key err %w", err)
 	}
 	ciphertext := c.gcm.Seal(nonce, nonce, data, nil)
 	return ciphertext, err

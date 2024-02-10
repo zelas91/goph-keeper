@@ -25,7 +25,7 @@ func (c *Card) Delete(args []string) error {
 	url := fmt.Sprintf("/card/%s", args[0])
 	resp, err := c.request.R().Delete(url)
 	if err != nil {
-		return fmt.Errorf("request card delete err: %v", err)
+		return fmt.Errorf("request card delete err: %w", err)
 	}
 	if resp.StatusCode() != http.StatusOK {
 		return fmt.Errorf("request card delete error status code = %d", resp.StatusCode())
@@ -39,7 +39,7 @@ func (c *Card) Update(args []string) error {
 	}
 	cardID, err := strconv.Atoi(args[0])
 	if err != nil {
-		return fmt.Errorf("card id err:%v", err)
+		return fmt.Errorf("card id err:%w", err)
 	}
 
 	var card models.Card
@@ -66,12 +66,12 @@ func (c *Card) Update(args []string) error {
 	}
 
 	if resp.StatusCode() != http.StatusOK {
-		return fmt.Errorf("request get card id error status code = %d, body=%v",
+		return fmt.Errorf("request get card id error status code = %d, body=%s",
 			resp.StatusCode(), string(resp.Body()))
 	}
 
 	if err := json.Unmarshal(resp.Body(), &card); err != nil {
-		return fmt.Errorf("request card decode err: %v", err)
+		return fmt.Errorf("request card decode err: %w", err)
 	}
 
 	card = updateModelCard(card, number, cvv, expired)

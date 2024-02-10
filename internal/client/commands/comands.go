@@ -90,7 +90,7 @@ func (c *CommandManager) help(args []string) error {
 	}
 	fmt.Fprintln(w, "-----------------------------------------------------------")
 	if err := w.Flush(); err != nil {
-		return fmt.Errorf("table format err :%v", err)
+		return fmt.Errorf("table format err :%w", err)
 	}
 	return nil
 }

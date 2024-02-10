@@ -28,7 +28,7 @@ func (b *BinaryFile) Delete(args []string) error {
 	url := fmt.Sprintf("/file/%s", args[0])
 	resp, err := b.request.R().Delete(url)
 	if err != nil {
-		return fmt.Errorf("request file delete err: %v", err)
+		return fmt.Errorf("request file delete err: %w", err)
 	}
 	if resp.StatusCode() != http.StatusOK {
 		return fmt.Errorf("request file delete error status code = %d", resp.StatusCode())
@@ -43,7 +43,7 @@ func (b *BinaryFile) Upload(args []string) error {
 
 	file, err := os.Open(args[1])
 	if err != nil {
-		return fmt.Errorf("open file err:%v", err)
+		return fmt.Errorf("open file err:%w", err)
 	}
 	defer func() {
 		if err := file.Close(); err != nil {
@@ -52,7 +52,7 @@ func (b *BinaryFile) Upload(args []string) error {
 	}()
 	fInfo, err := file.Stat()
 	if err != nil {
-		return fmt.Errorf("file info err:%v", err)
+		return fmt.Errorf("file info err:%w", err)
 	}
 	bf := models.BinaryFile{
 		FileName: args[0],
@@ -60,7 +60,7 @@ func (b *BinaryFile) Upload(args []string) error {
 	}
 	conn, err := b.request.WebsocketConnect("/file/upload")
 	if err != nil {
-		return fmt.Errorf("failed to connect to server: %v", err)
+		return fmt.Errorf("failed to connect to server: %w", err)
 	}
 	defer func() {
 		if err := conn.Close(); err != nil {
@@ -69,11 +69,11 @@ func (b *BinaryFile) Upload(args []string) error {
 	}()
 
 	if err = conn.WriteJSON(bf); err != nil {
-		return fmt.Errorf("faile encode to json: %v", err)
+		return fmt.Errorf("faile encode to json: %w", err)
 	}
 	var answer models.AnswerBinaryFile
 	if err = conn.ReadJSON(&answer); err != nil {
-		return fmt.Errorf("read  answer server err %v", err)
+		return fmt.Errorf("read  answer server err %w", err)
 
 	}
 	if !answer.Confirm {
@@ -85,17 +85,17 @@ func (b *BinaryFile) Upload(args []string) error {
 		n, err := file.Read(buffer)
 		if err != nil {
 			if err != io.EOF {
-				return fmt.Errorf("read file err: %v", err)
+				return fmt.Errorf("read file err: %w", err)
 			}
 			if err := conn.WriteMessage(websocket.TextMessage,
 				[]byte("Binary data transfer completed")); err != nil {
-				return fmt.Errorf("websocket send msg end file err: %v", err)
+				return fmt.Errorf("websocket send msg end file err: %w", err)
 			}
 			break
 		}
 		err = conn.WriteMessage(websocket.BinaryMessage, buffer[:n])
 		if err != nil {
-			return fmt.Errorf("websocket send msg err: %v", err)
+			return fmt.Errorf("websocket send msg err: %w", err)
 		}
 		counter = counter + len(buffer[:n])
 		fmt.Printf("\rupload: %dKB file size = %dKB", counter/1024, bf.Size/1024)
@@ -103,7 +103,7 @@ func (b *BinaryFile) Upload(args []string) error {
 	fmt.Println("")
 	_, _, err = conn.ReadMessage()
 	if !websocket.IsCloseError(err, websocket.CloseNormalClosure) {
-		return fmt.Errorf("transfer completed with err: %v", err)
+		return fmt.Errorf("transfer completed with err: %w", err)
 	}
 	return nil
 }
@@ -115,19 +115,19 @@ func (b *BinaryFile) Download(args []string) error {
 	url := fmt.Sprintf("/file/%s", args[0])
 	resp, err := b.request.R().Get(url)
 	if err != nil {
-		return fmt.Errorf("request file information err: %v", err)
+		return fmt.Errorf("request file information err: %w", err)
 	}
 	if resp.StatusCode() != http.StatusOK {
 		return fmt.Errorf("request file information error status code = %d", resp.StatusCode())
 	}
 	var bf models.BinaryFile
 	if err := json.Unmarshal(resp.Body(), &bf); err != nil {
-		return fmt.Errorf("file information decode err: %v", err)
+		return fmt.Errorf("file information decode err: %w", err)
 	}
 
 	conn, err := b.request.WebsocketConnect("/file/download")
 	if err != nil {
-		return fmt.Errorf("failed to connect to server: %v", err)
+		return fmt.Errorf("failed to connect to server: %w", err)
 	}
 	defer func() {
 		if err := conn.Close(); err != nil {
@@ -136,12 +136,12 @@ func (b *BinaryFile) Download(args []string) error {
 	}()
 
 	if err = conn.WriteJSON(bf); err != nil {
-		return fmt.Errorf("faile encode to json: %v", err)
+		return fmt.Errorf("faile encode to json: %w", err)
 	}
 
 	var answer models.AnswerBinaryFile
 	if err = conn.ReadJSON(&answer); err != nil {
-		return fmt.Errorf("read  answer server err %v", err)
+		return fmt.Errorf("read  answer server err %w", err)
 
 	}
 	if !answer.Confirm {
@@ -149,7 +149,7 @@ func (b *BinaryFile) Download(args []string) error {
 	}
 	file, err := os.Create(fmt.Sprintf("%s/%s", args[1], bf.FileName))
 	if err != nil {
-		return fmt.Errorf("create file err:%v", err)
+		return fmt.Errorf("create file err:%w", err)
 	}
 	defer func() {
 		if err := file.Close(); err != nil {
@@ -163,12 +163,12 @@ func (b *BinaryFile) Download(args []string) error {
 			if websocket.IsCloseError(err, websocket.CloseNormalClosure) {
 				break
 			}
-			return fmt.Errorf("failed to read message: %v", err)
+			return fmt.Errorf("failed to read message: %w", err)
 		}
 		if mt == websocket.BinaryMessage {
 			_, err := file.Write(msg)
 			if err != nil {
-				return fmt.Errorf("write file err: %v", err)
+				return fmt.Errorf("write file err: %w", err)
 			}
 		}
 		counter = counter + len(msg)
