@@ -96,7 +96,6 @@ func TestCreateUser(t *testing.T) {
 			}
 			serv := New(WithAuthUseRepository(repo))
 			res := serv.Auth.CreateUser(context.TODO(), models.User{Login: test.user.Login, Password: test.user.Password})
-			fmt.Println(res)
 			assert.Equal(t, test.want, res)
 		})
 	}
