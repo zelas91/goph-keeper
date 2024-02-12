@@ -16,6 +16,11 @@ type Service struct {
 	BinaryFile *binaryFile
 }
 
+type crypto interface {
+	Encrypt(data []byte) ([]byte, error)
+	Decrypt(data []byte) ([]byte, error)
+}
+
 func New(options ...func(s *Service)) *Service {
 	sv := &Service{}
 	for _, opt := range options {
@@ -30,20 +35,20 @@ func WithAuthUseRepository(up userRepo) func(s *Service) {
 	}
 }
 
-func WithCardUseRepository(cr cardRepo) func(s *Service) {
+func WithCardUseRepository(cr cardRepo, crypto crypto) func(s *Service) {
 	return func(s *Service) {
-		s.CreditCard = &creditCard{repo: cr}
+		s.CreditCard = &creditCard{repo: cr, crypto: crypto}
 	}
 }
 
-func WithCredentialUseRepository(cr credentialRepo) func(s *Service) {
+func WithCredentialUseRepository(cr credentialRepo, crypto crypto) func(s *Service) {
 	return func(s *Service) {
-		s.Credential = &credential{repo: cr}
+		s.Credential = &credential{repo: cr, crypto: crypto}
 	}
 }
-func WithTextUseRepository(tr textDataRepo) func(s *Service) {
+func WithTextUseRepository(tr textDataRepo, crypto crypto) func(s *Service) {
 	return func(s *Service) {
-		s.TextData = &textData{repo: tr}
+		s.TextData = &textData{repo: tr, crypto: crypto}
 	}
 }
 

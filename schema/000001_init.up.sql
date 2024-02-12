@@ -19,9 +19,9 @@ create table cards
 (
     id  bigserial not null unique primary key ,
     user_id int references users (id) not null ,
-    number varchar not null unique,
-    expired_at varchar not null,
-    cvv varchar not null,
+    number  bytea not null unique,
+    expired_at bytea not null,
+    cvv bytea not null,
     version int default 1,
     created_at timestamp not null default now(),
     update_at timestamp not null default now()
@@ -36,8 +36,8 @@ create table user_credentials
 (
     id  bigserial not null unique primary key ,
     user_id int references users (id) not null ,
-    login varchar unique not null ,
-    password varchar not null,
+    login bytea unique not null ,
+    password bytea not null,
     version int default 1,
     created_at timestamp not null default now(),
     update_at timestamp not null default now()
@@ -52,7 +52,7 @@ create table text_data
 (
     id  bigserial not null unique primary key ,
     user_id int references users (id) not null ,
-    large_text text not null ,
+    large_text bytea not null ,
     version int default 1,
     created_at timestamp not null default now(),
     update_at timestamp not null default now()

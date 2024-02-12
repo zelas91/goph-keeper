@@ -11,7 +11,7 @@ type Crypto struct {
 	gcm cipher.AEAD
 }
 
-func NewEncrypt(secretKey string) (*Crypto, error) {
+func NewCrypto(secretKey string) (*Crypto, error) {
 	block, err := aes.NewCipher([]byte(secretKey))
 
 	if err != nil {

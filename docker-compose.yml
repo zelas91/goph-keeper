@@ -31,3 +31,4 @@ services:
     environment:
       WAIT_HOSTS: postgres:5432
       DATABASE_URI: host=psql-keeper port=5432 user=keeper dbname=goph-keeper password=12345678 sslmode=disable
+      ENCRYPT_SECRET_KEY: bb6c537880afbd4a

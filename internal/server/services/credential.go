@@ -3,7 +3,6 @@ package services
 import (
 	"fmt"
 
-	"github.com/zelas91/goph-keeper/internal/server/helper"
 	"github.com/zelas91/goph-keeper/internal/server/models"
 	"github.com/zelas91/goph-keeper/internal/server/repository/entities"
 	"github.com/zelas91/goph-keeper/internal/server/types"
@@ -11,7 +10,8 @@ import (
 )
 
 type credential struct {
-	repo credentialRepo
+	repo   credentialRepo
+	crypto crypto
 }
 
 //go:generate mockgen -package mocks -destination=./mocks/mock_credential_repo.go -source=credential.go -package=mock
@@ -26,7 +26,11 @@ type credentialRepo interface {
 func (c credential) Create(ctx context.Context, uc models.UserCredentials) error {
 	userID := ctx.Value(types.UserIDKey).(int)
 	uc.UserId = userID
-	if err := c.repo.Create(ctx, helper.ToEntitiesUserCredential(uc)); err != nil {
+	ucEntities, err := c.encryptToEntities(uc)
+	if err != nil {
+		return err
+	}
+	if err := c.repo.Create(ctx, ucEntities); err != nil {
 		return fmt.Errorf("create credential err: %w", err)
 	}
 	return nil
@@ -40,7 +44,11 @@ func (c credential) Credentials(ctx context.Context) ([]models.UserCredentials, 
 	}
 	ucsModel := make([]models.UserCredentials, len(ucs))
 	for i, v := range ucs {
-		ucsModel[i] = helper.ToModelUserCredential(v)
+		ucModel, err := c.decryptToModels(v)
+		if err != nil {
+			return nil, err
+		}
+		ucsModel[i] = ucModel
 	}
 	return ucsModel, err
 }
@@ -48,10 +56,15 @@ func (c credential) Credentials(ctx context.Context) ([]models.UserCredentials, 
 func (c credential) Credential(ctx context.Context, ucID int) (models.UserCredentials, error) {
 	userID := ctx.Value(types.UserIDKey).(int)
 	uc, err := c.repo.FindByIDAndUserID(ctx, ucID, userID)
+
 	if err != nil {
 		return models.UserCredentials{}, fmt.Errorf("get Credentials err: %w", err)
 	}
-	return helper.ToModelUserCredential(uc), nil
+	ucModel, err := c.decryptToModels(uc)
+	if err != nil {
+		return models.UserCredentials{}, err
+	}
+	return ucModel, nil
 }
 
 func (c credential) Delete(ctx context.Context, ucID int) error {
@@ -66,8 +79,48 @@ func (c credential) Delete(ctx context.Context, ucID int) error {
 func (c credential) Update(ctx context.Context, uc models.UserCredentials) error {
 	userID := ctx.Value(types.UserIDKey).(int)
 	uc.UserId = userID
-	if err := c.repo.Update(ctx, helper.ToEntitiesUserCredential(uc)); err != nil {
+	ucEntities, err := c.encryptToEntities(uc)
+	if err != nil {
+		return err
+	}
+	if err := c.repo.Update(ctx, ucEntities); err != nil {
 		return fmt.Errorf("update credentials err:%w", err)
 	}
 	return nil
+}
+
+func (c credential) encryptToEntities(us models.UserCredentials) (entities.UserCredentials, error) {
+	password, err := c.crypto.Encrypt([]byte(us.Password))
+	if err != nil {
+		return entities.UserCredentials{}, err
+	}
+	login, err := c.crypto.Encrypt([]byte(us.Login))
+	if err != nil {
+		return entities.UserCredentials{}, err
+	}
+	return entities.UserCredentials{
+		Login:    login,
+		Password: password,
+		ID:       us.ID,
+		UserId:   us.UserId,
+		Version:  us.Version,
+	}, nil
+}
+
+func (c credential) decryptToModels(us entities.UserCredentials) (models.UserCredentials, error) {
+	login, err := c.crypto.Decrypt(us.Login)
+	if err != nil {
+		return models.UserCredentials{}, err
+	}
+	password, err := c.crypto.Decrypt(us.Password)
+	if err != nil {
+		return models.UserCredentials{}, err
+	}
+	return models.UserCredentials{
+		ID:       us.ID,
+		UserId:   us.UserId,
+		Version:  us.Version,
+		Password: string(password),
+		Login:    string(login),
+	}, nil
 }

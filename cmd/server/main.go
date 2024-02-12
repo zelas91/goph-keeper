@@ -2,6 +2,7 @@ package main
 
 import (
 	"errors"
+	crypto2 "github.com/zelas91/goph-keeper/internal/utils/crypto"
 	"golang.org/x/net/context"
 	"net/http"
 	"os/signal"
@@ -26,13 +27,17 @@ func main() {
 		log.Fatalf("db init err : %v", err)
 	}
 
+	crypto, err := crypto2.NewCrypto(*cfg.SecretKey)
+	if err != nil {
+		log.Fatalf("crypto init err : %v", err)
+	}
 	repo := repository.New(log, db)
 
 	serv := services.New(
 		services.WithAuthUseRepository(repo.Auth),
-		services.WithCardUseRepository(repo.CreditCard),
-		services.WithCredentialUseRepository(repo.Credential),
-		services.WithTextUseRepository(repo.TextData),
+		services.WithCardUseRepository(repo.CreditCard, crypto),
+		services.WithCredentialUseRepository(repo.Credential, crypto),
+		services.WithTextUseRepository(repo.TextData, crypto),
 		services.WithBinaryFileUseRepository(repo.BinaryFile, log, *cfg.BasePathSaveFile),
 	)
 
