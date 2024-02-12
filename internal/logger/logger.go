@@ -14,17 +14,16 @@ var (
 	logger *zap.SugaredLogger
 )
 
-func Shutdown() {
-	if err := logger.Sync(); err != nil {
-		log.Printf("logger sync %v", err)
-	}
-}
 func New(pathCfg string) Logger {
 	once.Do(func() {
 		file, err := os.ReadFile(pathCfg)
 		if err != nil {
 			log.Println(err)
-			l, err := zap.NewDevelopment()
+			cfg := zap.NewProductionConfig()
+			cfg.OutputPaths = []string{"stdout", "noConfigLogger.log"}
+			cfg.ErrorOutputPaths = []string{"stdout", "noConfigLogger.log"}
+			cfg.Level = zap.NewAtomicLevelAt(zap.DebugLevel)
+			l, err := cfg.Build()
 			if err != nil {
 				log.Fatal(err)
 			}
