@@ -18,7 +18,7 @@ var (
 )
 
 func init() {
-	addr = flag.String("a", ":8080", "endpoint start server")
+	addr = flag.String("a", "localhost:8080", "endpoint start server")
 	dbURL = flag.String("d", "host=localhost port=5432 user=keeper dbname=goph-keeper password=12345678 sslmode=disable", "url DB")
 	cfgLogger = flag.String("l", "cfg/config.json", "config file logger")
 	basePathSaveFile = flag.String("s", "save_file", "dir save file")

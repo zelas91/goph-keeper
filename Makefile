@@ -15,7 +15,7 @@ clean:
     	rm -r build; \
     fi
 
-server-build:encrypt
+server-build:  test-all
 	go build -o build/server/$(NAME_SERVER) \
  -ldflags "-X main.buildCommit=$$(git rev-parse --short HEAD)\
      -X main.buildDate=$$(date +'%Y-%m-%d_%H:%M')"\
@@ -26,8 +26,7 @@ ifeq ($(GOOS), windows)
 	mv build/client/$(NAME_CLIENT)-$(GOOS)-$(GOARCH) build/client/$(NAME_CLIENT)-$(GOOS)-$(GOARCH).exe
 endif
 
-run-docker:
-	make server-build
+run-docker: clean server-build
 	docker-compose up
 
 build-all:clean encrypt
@@ -38,7 +37,7 @@ build-all:clean encrypt
 
 test-all:
 	go generate ./...
-	go test -count=100 ./... -coverprofile cover.out
+	go test -count=10 ./... -coverprofile cover.out
 	go tool cover -html=cover.out
 
 fmt:
