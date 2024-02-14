@@ -5,14 +5,15 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"net/http"
+	"net/http/httptest"
+	"testing"
+
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 	"github.com/zelas91/goph-keeper/internal/logger"
 	mock2 "github.com/zelas91/goph-keeper/internal/server/controllers/mocks"
 	"github.com/zelas91/goph-keeper/internal/server/models"
-	"net/http"
-	"net/http/httptest"
-	"testing"
 )
 
 func TestCards(t *testing.T) {

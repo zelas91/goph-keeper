@@ -2,12 +2,13 @@ package main
 
 import (
 	"errors"
-	crypto2 "github.com/zelas91/goph-keeper/internal/utils/crypto"
-	"golang.org/x/net/context"
 	"net/http"
 	"os/signal"
 	"syscall"
 	"time"
+
+	crypto2 "github.com/zelas91/goph-keeper/internal/utils/crypto"
+	"golang.org/x/net/context"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/zelas91/goph-keeper/internal/logger"

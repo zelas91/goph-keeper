@@ -4,6 +4,11 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"net/http"
+	"net/http/httptest"
+	"strings"
+	"testing"
+
 	"github.com/golang/mock/gomock"
 	"github.com/gorilla/websocket"
 	"github.com/stretchr/testify/assert"
@@ -11,10 +16,6 @@ import (
 	mock2 "github.com/zelas91/goph-keeper/internal/server/controllers/mocks"
 	"github.com/zelas91/goph-keeper/internal/server/models"
 	"golang.org/x/net/context"
-	"net/http"
-	"net/http/httptest"
-	"strings"
-	"testing"
 )
 
 type upload struct {
@@ -33,7 +34,7 @@ func TestUpload(t *testing.T) {
 			name: "#1 ok",
 			mockBehaviorUploadService: func(s *mock2.MockbinaryFileService, binary models.BinaryFile) {
 				s.EXPECT().Upload(gomock.Any(), binary, gomock.Any()).DoAndReturn(func(ctx context.Context, bf models.BinaryFile, reader <-chan []byte) error {
-					for _ = range reader {
+					for range reader {
 
 					}
 					return nil
@@ -51,7 +52,7 @@ func TestUpload(t *testing.T) {
 			name: "#2 nok service save err",
 			mockBehaviorUploadService: func(s *mock2.MockbinaryFileService, binary models.BinaryFile) {
 				s.EXPECT().Upload(gomock.Any(), binary, gomock.Any()).DoAndReturn(func(ctx context.Context, bf models.BinaryFile, reader <-chan []byte) error {
-					for _ = range reader {
+					for range reader {
 
 					}
 					return errors.New("save error")

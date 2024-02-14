@@ -2,9 +2,10 @@ package controllers
 
 import (
 	"fmt"
-	"github.com/zelas91/goph-keeper/internal/server/payload"
 	"net/http"
 	"os"
+
+	"github.com/zelas91/goph-keeper/internal/server/payload"
 
 	"github.com/go-chi/chi/v5"
 	middleware2 "github.com/go-chi/chi/v5/middleware"

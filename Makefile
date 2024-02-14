@@ -5,6 +5,7 @@ NAME_CLIENT = goph-keeper-client
 FLAGS_BUILD =  "-X main.buildCommit=$$(git rev-parse --short HEAD) -X main.buildDate=$$(date +'%Y-%m-%d_%H:%M')"
 .SILENT:
 .PHONY:
+
 encrypt:
 	if [ ! -f "secretKey.txt" ]; then \
 		openssl rand -hex 8 > secretKey.txt; \
