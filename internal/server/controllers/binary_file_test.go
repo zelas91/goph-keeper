@@ -32,7 +32,12 @@ func TestUpload(t *testing.T) {
 		{
 			name: "#1 ok",
 			mockBehaviorUploadService: func(s *mock2.MockbinaryFileService, binary models.BinaryFile) {
-				s.EXPECT().Upload(gomock.Any(), binary, gomock.Any()).Return(nil)
+				s.EXPECT().Upload(gomock.Any(), binary, gomock.Any()).DoAndReturn(func(ctx context.Context, bf models.BinaryFile, reader <-chan []byte) error {
+					for _ = range reader {
+
+					}
+					return nil
+				})
 			},
 			want: websocket.CloseNormalClosure,
 			url:  "/upload",
@@ -45,7 +50,12 @@ func TestUpload(t *testing.T) {
 		{
 			name: "#2 nok service save err",
 			mockBehaviorUploadService: func(s *mock2.MockbinaryFileService, binary models.BinaryFile) {
-				s.EXPECT().Upload(gomock.Any(), binary, gomock.Any()).Return(errors.New("error save"))
+				s.EXPECT().Upload(gomock.Any(), binary, gomock.Any()).DoAndReturn(func(ctx context.Context, bf models.BinaryFile, reader <-chan []byte) error {
+					for _ = range reader {
+
+					}
+					return errors.New("save error")
+				})
 			},
 			want: websocket.CloseInternalServerErr,
 			url:  "/upload",
@@ -125,6 +135,10 @@ func clientWebsocketUpload(test upload, url string) error {
 	err = c.WriteMessage(websocket.BinaryMessage, test.buffer)
 	if err != nil {
 		return fmt.Errorf("write binary err:%w ", err)
+	}
+	if err := c.WriteMessage(websocket.TextMessage,
+		[]byte("Binary data transfer completed")); err != nil {
+		return fmt.Errorf("websocket send msg end file err: %w", err)
 	}
 	mt, _, err := c.ReadMessage()
 	if err != nil {
